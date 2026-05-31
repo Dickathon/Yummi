@@ -1075,6 +1075,53 @@ html.order-guide-open {
   letter-spacing: 0.04em;
 }
 
+.order-report-section--diet {
+  background:
+    linear-gradient(135deg, rgba(255, 228, 196, 0.22), transparent),
+    rgba(255, 255, 255, 0.5);
+}
+
+.order-report-diet__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.order-report-diet__item {
+  display: grid;
+  gap: 4px;
+  padding: 12px 12px 12px 14px;
+  border-left: 3px solid color-mix(in srgb, var(--color-matcha) 68%, var(--color-primary));
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.order-report-diet__label {
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.order-report-diet__text {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.order-report-diet__disclaimer {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(92, 75, 58, 0.16);
+  color: var(--color-text-muted);
+  font-size: 0.68rem;
+  line-height: 1.65;
+  letter-spacing: 0.02em;
+}
+
 .order-report-card__footer {
   padding-top: 2px;
   text-align: center;
@@ -1229,9 +1276,18 @@ html.order-guide-open {
 }
 
 .turntable-slot[data-placard-interactive="true"] .turntable-placard-hit,
-.turntable-slot[data-placard-interactive="true"] .turntable-slot-image {
+.turntable-slot[data-placard-interactive="true"] .turntable-slot-image,
+.turntable-slot[data-placard-interactive="true"] .turntable-food-tag__bg,
+.turntable-slot[data-placard-interactive="true"] .turntable-food-tag__text {
   pointer-events: auto;
-  cursor: pointer;
+  cursor: grab;
+}
+
+.turntable-slot[data-placard-interactive="true"] .turntable-placard-hit:active,
+.turntable-slot[data-placard-interactive="true"] .turntable-slot-image:active,
+.turntable-slot[data-placard-interactive="true"] .turntable-food-tag__bg:active,
+.turntable-slot[data-placard-interactive="true"] .turntable-food-tag__text:active {
+  cursor: grabbing;
 }
 
 .turntable-slot--selected .turntable-slot-base {

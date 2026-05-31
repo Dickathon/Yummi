@@ -21,8 +21,27 @@
   var feedStatus = null;
   var feedSlots = [];
   var feedingLocked = false;
+  var feedingClose = null;
   var bubbleTimer = null;
   var FEED_PRICE = 1;
+  var RANDOM_BACKGROUNDS = [
+    { src: "source/svgSHOP/interior_starbucks.svg", name: "星巴克" },
+    { src: "source/svgSHOP/interior_mcdonalds.svg", name: "麦当劳" },
+    { src: "source/svgSHOP/interior_heytea.svg", name: "喜茶" },
+    { src: "source/svgSHOP/interior_kfc.svg", name: "肯德基" },
+    { src: "source/svgSHOP/interior_haidilao.svg", name: "海底捞" },
+    { src: "source/svgSHOP/interior_mixue.svg", name: "蜜雪冰城" },
+    { src: "source/svgSHOP/interior_luckin.svg", name: "瑞幸咖啡" },
+    { src: "source/svgSHOP/interior_burgerking.svg", name: "汉堡王" },
+    { src: "source/svgSHOP/interior_chapanda.svg", name: "茶百道" },
+    { src: "source/svgSHOP/interior_pizzahut.svg", name: "必胜客" },
+    { src: "source/svgSHOP/interior_nayuki.svg", name: "奈雪的茶" },
+    { src: "source/svgSHOP/interior_subway.svg", name: "赛百味" },
+    { src: "source/svgSHOP/interior_alittle_tea.svg", name: "一点点" },
+    { src: "source/svgSHOP/interior_auntea.svg", name: "沪上阿姨" },
+    { src: "source/svgSHOP/interior_goodme.svg", name: "古茗" },
+    { src: "source/svgSHOP/interior_laoxiangji.svg", name: "老乡鸡" }
+  ];
 
   // 店铺文件名 → SVG 文件名映射（与 shop.js 保持一致）
   function getSvgFile(shopFile) {
@@ -258,9 +277,7 @@
     var src = getFoodImageUrl(name);
 
     return (
-      '<button type="button" class="fc-feed-food" role="listitem"' +
-        ' data-feed-slot="' + index + '" data-feed-name="' + escapeHtml(name) + '"' +
-        ' aria-label="投喂' + escapeHtml(name) + '，价格 1 个小鱼干">' +
+      '<div class="fc-feed-food" role="listitem" data-feed-row="' + index + '">' +
         '<span class="fc-feed-food__plate" data-feed-food-art>' +
           (
             src
@@ -272,7 +289,10 @@
           '<span class="fc-feed-food__name">' + escapeHtml(name) + "</span>" +
           '<span class="fc-feed-food__price">1 个小鱼干</span>' +
         "</span>" +
-      "</button>"
+        '<button type="button" class="fc-feed-food__btn"' +
+          ' data-feed-slot="' + index + '" data-feed-name="' + escapeHtml(name) + '"' +
+          ' aria-label="投喂' + escapeHtml(name) + '，价格 1 个小鱼干">投喂</button>' +
+      "</div>"
     );
   }
 
@@ -300,7 +320,7 @@
       return;
     }
 
-    setFeedStatus("点击任意食物投喂，消耗 1 个小鱼干。", "");
+    setFeedStatus("点击「投喂」按钮，消耗 1 个小鱼干。", "");
   }
 
   function pickReplacement(slotIndex, fedName) {
@@ -436,6 +456,7 @@
 
   function handleFeedClick(event) {
     var btn = event.target.closest("[data-feed-slot]");
+    var row = btn && btn.closest("[data-feed-row]");
     var wallet = global.Yummi && global.Yummi.fishCoins;
     var slotIndex;
     var foodName;
@@ -458,8 +479,10 @@
 
     if (!wallet.spend(FEED_PRICE)) {
       btn.classList.add("is-denied");
+      if (row) row.classList.add("is-denied");
       setTimeout(function () {
         btn.classList.remove("is-denied");
+        if (row) row.classList.remove("is-denied");
       }, 420);
       setFeedStatus("小鱼干不够啦，投喂需要 1 个小鱼干。", "error");
       return;
@@ -467,10 +490,11 @@
 
     feedingLocked = true;
     btn.classList.add("is-feeding");
+    if (row) row.classList.add("is-feeding");
     renderFishCoins();
     setFeedStatus("投喂中，哈基米正在接住「" + foodName + "」。", "");
 
-    animateFoodToPet(btn).then(function () {
+    animateFoodToPet(row || btn).then(function () {
       finishFeeding(slotIndex, foodName);
       feedingLocked = false;
     }, function () {
@@ -479,27 +503,42 @@
     });
   }
 
-  function focusFeeding() {
+  function closeFeeding() {
     if (!feedingStage) {
       return;
     }
+    feedingStage.setAttribute("aria-hidden", "true");
+  }
 
-    renderFoodSlots();
-    feedingStage.classList.add("is-highlighted");
-    setTimeout(function () {
-      feedingStage.classList.remove("is-highlighted");
-    }, 900);
+  function resolveBackground() {
+    var snapshot = getDressSnapshot();
+    var chosen = snapshot && snapshot.activeBackground;
 
-    if (typeof feedingStage.scrollIntoView === "function") {
-      feedingStage.scrollIntoView({
-        block: "end",
-        behavior: prefersReducedMotion() ? "auto" : "smooth"
-      });
+    if (chosen && chosen.src) {
+      return chosen;
+    }
+
+    return randomChoice(RANDOM_BACKGROUNDS);
+  }
+
+  function applyBackground() {
+    var bgImg = document.getElementById("fcBgImg");
+    var background;
+
+    if (!bgImg) {
+      return;
+    }
+
+    background = resolveBackground();
+    if (background && background.src) {
+      bgImg.src = background.src;
+      bgImg.alt = (background.name || "店铺") + "背景";
     }
   }
 
   function setupFeeding() {
     feedingStage = document.getElementById("fcFeeding");
+    feedingClose = document.getElementById("fcFeedingClose");
     petStage = document.getElementById("fcPetStage");
     petBubble = document.getElementById("fcPetBubble");
     foodList = document.getElementById("fcFoodList");
@@ -512,6 +551,16 @@
       foodList.addEventListener("click", handleFeedClick);
     }
 
+    if (feedingClose) {
+      feedingClose.addEventListener("click", closeFeeding);
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && feedingStage && feedingStage.getAttribute("aria-hidden") === "false") {
+        closeFeeding();
+      }
+    });
+
     global.addEventListener("storage", function (event) {
       if (event.key === "yummi_food_selection") {
         feedSlots = [];
@@ -519,6 +568,7 @@
       }
       if (event.key === "yummi_dress_selection") {
         renderOwnPetStage();
+        applyBackground();
       }
     });
   }
@@ -795,24 +845,11 @@
   }
 
   function init() {
-    var index = getLastShopIndex();
-    var bgImg = document.getElementById("fcBgImg");
-    var feedBtn = document.getElementById("fcFeed");
-
-    if (index !== -1 && bgImg) {
-      var shop = SHOPS[index];
-      bgImg.src = getSvgFile(shop.file);
-      bgImg.alt = "店铺背景";
-    }
+    applyBackground();
 
     setupInbox();
     setupPreference();
     setupFeeding();
-    if (feedBtn) {
-      feedBtn.addEventListener("click", function () {
-        focusFeeding();
-      });
-    }
 
     // 鱼干收益
     setupEarnings();

@@ -522,30 +522,34 @@
   position: relative;
   z-index: 4;
   display: grid;
-  gap: 7px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
   padding: 0 2px max(0px, var(--safe-bottom));
 }
 
 .dress-export-btn {
   position: relative;
   isolation: isolate;
-  min-height: 78px;
+  min-height: 0;
   overflow: hidden;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: 1fr;
   grid-template-areas:
-    "kicker text"
-    "kicker sub";
-  column-gap: 13px;
-  align-items: center;
-  padding: 14px 18px;
-  border-radius: 25px;
+    "kicker"
+    "text"
+    "sub";
+  row-gap: 4px;
+  justify-items: center;
+  align-content: center;
+  padding: 10px 8px 11px;
+  border-radius: 18px;
+  text-align: center;
   color: #fffaf2;
   background:
     radial-gradient(circle at 18% 16%, rgba(255, 250, 242, 0.34), transparent 31%),
     linear-gradient(135deg, #5c4b3a 0%, #8b5e36 48%, #c28a50 100%);
   box-shadow:
-    0 18px 30px rgba(92, 75, 58, 0.22),
+    0 10px 18px rgba(92, 75, 58, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
   text-align: left;
   transition:
@@ -555,7 +559,6 @@
 }
 
 .dress-export-btn--code {
-  min-height: 72px;
   background:
     radial-gradient(circle at 18% 16%, rgba(255, 252, 247, 0.32), transparent 31%),
     linear-gradient(135deg, #8b7058 0%, #bf8f61 52%, #e1b77a 100%);
@@ -575,9 +578,9 @@
 .dress-export-btn::after {
   content: "";
   position: absolute;
-  right: 16px;
-  top: 15px;
-  width: 64px;
+  right: 8px;
+  top: 8px;
+  width: 36px;
   aspect-ratio: 1;
   border-radius: 50%;
   background:
@@ -602,12 +605,12 @@
   grid-area: kicker;
   display: grid;
   place-items: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
   border: 1px solid rgba(255, 250, 242, 0.34);
   background: rgba(255, 250, 242, 0.14);
-  font-size: 0.66rem;
+  font-size: 0.56rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   line-height: 1.15;
@@ -616,19 +619,24 @@
 
 .dress-export-btn__text {
   grid-area: text;
-  align-self: end;
-  font-size: 1rem;
+  align-self: center;
+  font-size: 0.76rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
 }
 
 .dress-export-btn__sub {
   grid-area: sub;
-  align-self: start;
+  align-self: center;
   color: rgba(255, 250, 242, 0.76);
-  font-size: 0.7rem;
-  line-height: 1.45;
-  letter-spacing: 0.04em;
+  font-size: 0.58rem;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dress-export-btn.is-loading .dress-export-btn__text::after {
@@ -640,6 +648,7 @@
 }
 
 .dress-export-status {
+  grid-column: 1 / -1;
   min-height: 1.5em;
   color: var(--color-text-muted);
   font-size: 0.72rem;
@@ -793,19 +802,24 @@
 }
 
 .dress-export-modal__actions {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 9px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: center;
+  gap: 8px;
 }
 
 .dress-export-modal__save,
 .dress-export-modal__secondary {
-  min-height: 42px;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 10px;
   display: grid;
   place-items: center;
   border-radius: var(--radius-pill);
-  font-size: 0.84rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
   text-decoration: none;
   transition:
     transform var(--transition-fast),
@@ -1325,19 +1339,29 @@
   }
 
   .dress-export-btn {
-    min-height: 72px;
-    padding: 12px 14px;
-    column-gap: 10px;
+    padding: 9px 6px 10px;
   }
 
   .dress-export-btn__kicker {
-    width: 46px;
-    height: 46px;
-    border-radius: 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    font-size: 0.52rem;
   }
 
-  .dress-export-modal__actions {
-    grid-template-columns: 1fr;
+  .dress-export-btn__text {
+    font-size: 0.72rem;
+  }
+
+  .dress-export-btn__sub {
+    font-size: 0.54rem;
+  }
+
+  .dress-export-modal__save,
+  .dress-export-modal__secondary {
+    min-height: 30px;
+    padding: 5px 8px;
+    font-size: 0.66rem;
   }
 }
 

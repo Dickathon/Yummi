@@ -29,7 +29,14 @@
   }
 
   var PLACARD_TAP_THRESHOLD_SQ = 400;
-  var PLACARD_LONG_PRESS_MS = 320;
+  var PLACARD_HIT_SELECTOR = "[data-placard-hit], [data-placard-image], [data-placard-label], [data-placard-label-bg], [data-placard-label-text]";
+
+  var TURNTABLE_VELOCITY_SMOOTH = 0.28;
+  var TURNTABLE_RELEASE_BOOST = 1.12;
+  var TURNTABLE_MAX_ANGULAR_VELOCITY = 540;
+  var TURNTABLE_FRICTION = 0.976;
+  var TURNTABLE_STOP_THRESHOLD = 0.12;
+  var TURNTABLE_AUTO_BLEND = 1.4;
 
   function escapeAttr(text) {
     return String(text == null ? "" : text)
@@ -114,6 +121,26 @@ function formatNumber(value) {
         if (delta > 180) delta -= 360;
         if (delta < -180) delta += 360;
         return delta;
+      }
+
+      function clampAngularVelocity(velocity) {
+        return Math.max(
+          -TURNTABLE_MAX_ANGULAR_VELOCITY,
+          Math.min(TURNTABLE_MAX_ANGULAR_VELOCITY, velocity)
+        );
+      }
+
+      function smoothAngularVelocity(previous, sample) {
+        if (!previous) {
+          return clampAngularVelocity(sample);
+        }
+        return clampAngularVelocity(
+          previous + ((sample - previous) * TURNTABLE_VELOCITY_SMOOTH)
+        );
+      }
+
+      function applyTurntableFriction(velocity, delta) {
+        return velocity * Math.pow(TURNTABLE_FRICTION, delta * 60);
       }
 
       function createCirclePath(radius) {
@@ -629,6 +656,7 @@ function renderCapSideImageBands(disc, geometry) {
           item.lastMoveTime = item.id === disc.id ? eventTime : null;
           item.angularVelocity = 0;
         });
+        runtime.state.smoothedAngularVelocity = 0;
         runtime.state.activeDiscId = disc.id;
       }
 
@@ -818,6 +846,30 @@ function renderCapSideImageBands(disc, geometry) {
         );
       }
 
+      function renderDietAdvice(report) {
+        var advice = (report && report.dietAdvice) || [];
+        if (!advice.length) return "";
+        return (
+          '<section class="order-report-section order-report-section--diet">' +
+            '<div class="order-report-section__head">' +
+              '<span class="order-report-section__kicker">Nutrition Lab</span>' +
+              '<h4 class="order-report-section__title">科学饮食建议</h4>' +
+            "</div>" +
+            '<ul class="order-report-diet__list">' +
+              advice.map(function (item) {
+                return (
+                  '<li class="order-report-diet__item">' +
+                    '<span class="order-report-diet__label">' + util.escapeHtml(item.label || "建议") + "</span>" +
+                    '<p class="order-report-diet__text">' + util.escapeHtml(item.text) + "</p>" +
+                  "</li>"
+                );
+              }).join("") +
+            "</ul>" +
+            '<p class="order-report-diet__disclaimer">以上建议参考《中国居民膳食指南》等公开营养学资料，仅供娱乐参考，不可替代专业医疗建议。</p>' +
+          "</section>"
+        );
+      }
+
       function renderReportCard(report, snapshot) {
         var personality = report.personality;
         var core = report.corePersonality;
@@ -858,6 +910,7 @@ function renderCapSideImageBands(disc, geometry) {
             "</section>" +
             renderTasteInsights(report) +
             renderRegionInsight(report) +
+            renderDietAdvice(report) +
             '<footer class="order-report-card__footer">此报告仅代表你的胃，不代表你的身份证所在地。</footer>' +
           "</div>"
         );
@@ -1365,64 +1418,11 @@ function renderCapSideImageBands(disc, geometry) {
         refreshSelectionUi();
       }
 
-      function cancelPlacardLongPressTimer(tap) {
-        if (tap && tap.longPressTimer) {
-          clearTimeout(tap.longPressTimer);
-          tap.longPressTimer = null;
-        }
-      }
-
-      function beginPlacardLongPressDrag(tap) {
-        var disc;
-        var pointerAngle;
-
-        if (!tap || tap.dragStarted) {
-          return;
-        }
-
-        disc = getDiscById(tap.dragDiscId) || getDiscById("top") || getDiscById("base");
-        if (!disc) {
-          return;
-        }
-
-        pointerAngle = tap.startPointerAngle;
-        if (pointerAngle == null) {
-          pointerAngle = getExtendedPointerAngle(disc, getSvgPoint({
-            clientX: tap.x,
-            clientY: tap.y
-          }), tap.dragHitType || "top");
-        }
-        if (pointerAngle == null) {
-          return;
-        }
-
-        tap.dragStarted = true;
-        startTurntableDrag(disc, tap.pointerId, pointerAngle, performance.now());
-        if (typeof runtime.stage.setPointerCapture === "function") {
-          runtime.stage.setPointerCapture(tap.pointerId);
-          runtime.hitTarget = runtime.stage;
-        } else {
-          runtime.hitTarget = null;
-        }
-      }
-
-      function schedulePlacardLongPress(tap) {
-        cancelPlacardLongPressTimer(tap);
-        tap.longPressTimer = window.setTimeout(function () {
-          tap.longPressTimer = null;
-          if (!runtime.pendingPlacardTap || runtime.pendingPlacardTap !== tap) {
-            return;
-          }
-          beginPlacardLongPressDrag(tap);
-        }, PLACARD_LONG_PRESS_MS);
-      }
-
       function clearPendingPlacardTap(pointerId) {
         if (!runtime.pendingPlacardTap) {
           return;
         }
         if (pointerId == null || runtime.pendingPlacardTap.pointerId === pointerId) {
-          cancelPlacardLongPressTimer(runtime.pendingPlacardTap);
           runtime.pendingPlacardTap = null;
         }
       }
@@ -1482,13 +1482,27 @@ function renderCapSideImageBands(disc, geometry) {
       }
 
       function releaseDisc(pointerId) {
+        var released = false;
+
         runtime.state.discs.forEach(function (disc) {
           if (disc.pointerId !== pointerId) return;
+          released = true;
           disc.dragging = false;
           disc.pointerId = null;
           disc.lastPointerAngle = null;
           disc.lastMoveTime = null;
         });
+
+        if (released && runtime.state.smoothedAngularVelocity) {
+          var releaseVelocity = clampAngularVelocity(
+            runtime.state.smoothedAngularVelocity * TURNTABLE_RELEASE_BOOST
+          );
+          runtime.state.discs.forEach(function (disc) {
+            disc.angularVelocity = releaseVelocity;
+          });
+        }
+
+        runtime.state.smoothedAngularVelocity = 0;
         runtime.state.activeDiscId = null;
         runtime.hitTarget = null;
       }
@@ -1575,8 +1589,38 @@ function renderCapSideImageBands(disc, geometry) {
         return true;
       }
 
+      function startPlacardDrag(event, slotNode, slotDisc, placardHit) {
+        var svgPoint = getSvgPoint(event);
+        var pointerAngle = slotDisc ? getExtendedPointerAngle(slotDisc, svgPoint, "top") : null;
+
+        if (!slotDisc || pointerAngle == null) {
+          return false;
+        }
+
+        runtime.pendingPlacardTap = {
+          pointerId: event.pointerId,
+          x: event.clientX,
+          y: event.clientY,
+          slotNode: slotNode,
+          dragDiscId: slotDisc.id,
+          dragHitType: "top",
+          startPointerAngle: pointerAngle,
+          startTime: event.timeStamp || performance.now()
+        };
+
+        startTurntableDrag(slotDisc, event.pointerId, pointerAngle, event.timeStamp || performance.now());
+        runtime.hitTarget = placardHit;
+
+        if (typeof runtime.stage.setPointerCapture === "function") {
+          runtime.stage.setPointerCapture(event.pointerId);
+        }
+
+        event.preventDefault();
+        return true;
+      }
+
       function handlePointerDown(event) {
-        var placardHit = event.target.closest("[data-placard-hit], [data-placard-image]");
+        var placardHit = event.target.closest(PLACARD_HIT_SELECTOR);
         var slotNode;
         var slotDisc;
 
@@ -1584,20 +1628,7 @@ function renderCapSideImageBands(disc, geometry) {
           slotNode = placardHit.closest("[data-placard-slot]");
           if (slotNode && slotNode.getAttribute("data-placard-interactive") === "true") {
             slotDisc = getDiscFromSlotNode(slotNode) || getDiscById("top") || getDiscById("base");
-            runtime.pendingPlacardTap = {
-              pointerId: event.pointerId,
-              x: event.clientX,
-              y: event.clientY,
-              slotNode: slotNode,
-              dragDiscId: slotDisc ? slotDisc.id : "",
-              dragHitType: "top",
-              startPointerAngle: slotDisc ? getExtendedPointerAngle(slotDisc, getSvgPoint(event), "top") : null,
-              startTime: event.timeStamp || performance.now(),
-              longPressTimer: null,
-              dragStarted: false
-            };
-            schedulePlacardLongPress(runtime.pendingPlacardTap);
-            event.preventDefault();
+            startPlacardDrag(event, slotNode, slotDisc, placardHit);
           }
           return;
         }
@@ -1633,14 +1664,6 @@ function renderCapSideImageBands(disc, geometry) {
       }
 
       function handlePointerMove(event) {
-        var tap = runtime.pendingPlacardTap;
-
-        if (tap && tap.pointerId === event.pointerId && !tap.dragStarted) {
-          if (getPointerTravelSq(event, tap.x, tap.y) > PLACARD_TAP_THRESHOLD_SQ) {
-            cancelPlacardLongPressTimer(tap);
-          }
-        }
-
         var disc = getDraggingDisc(event.pointerId);
         if (!disc) return;
 
@@ -1651,9 +1674,11 @@ function renderCapSideImageBands(disc, geometry) {
 
         var deltaAngle = angleDelta(pointerAngle, disc.lastPointerAngle);
         var now = event.timeStamp || performance.now();
-        var elapsed = Math.max(8, now - (disc.lastMoveTime || now));
-        var angularVelocity = deltaAngle / (elapsed / 1000);
+        var elapsed = Math.max(12, Math.min(now - (disc.lastMoveTime || now), 48));
+        var rawVelocity = deltaAngle / (elapsed / 1000);
+        var angularVelocity = smoothAngularVelocity(runtime.state.smoothedAngularVelocity, rawVelocity);
 
+        runtime.state.smoothedAngularVelocity = angularVelocity;
         rotateTurntable(deltaAngle, angularVelocity);
         disc.lastPointerAngle = pointerAngle;
         disc.lastMoveTime = now;
@@ -1666,16 +1691,8 @@ function renderCapSideImageBands(disc, geometry) {
         var dy;
 
         if (tap && tap.pointerId === event.pointerId) {
-          cancelPlacardLongPressTimer(tap);
           releaseHitTargetPointerCapture(event.pointerId);
-
-          if (tap.dragStarted) {
-            releaseDisc(event.pointerId);
-            runtime.hitTarget = null;
-            clearPendingPlacardTap(event.pointerId);
-            event.preventDefault();
-            return;
-          }
+          releaseDisc(event.pointerId);
 
           dx = event.clientX - tap.x;
           dy = event.clientY - tap.y;
@@ -1710,9 +1727,20 @@ function renderCapSideImageBands(disc, geometry) {
         }
 
         runtime.state.discs.forEach(function (disc) {
-          if (Math.abs(disc.angularVelocity) > 0.01) {
+          var absVelocity = Math.abs(disc.angularVelocity);
+
+          if (absVelocity > TURNTABLE_STOP_THRESHOLD) {
             disc.angle = normalizeAngle(disc.angle + (disc.angularVelocity * delta * disc.inertiaBoost));
-            disc.angularVelocity *= Math.pow(0.88, delta * 60);
+            disc.angularVelocity = applyTurntableFriction(disc.angularVelocity, delta);
+          } else if (absVelocity > 0.001) {
+            var blend = 1 - (absVelocity / TURNTABLE_AUTO_BLEND);
+            var coast = disc.angularVelocity * delta * (1 - (blend * 0.55));
+            var auto = disc.autoSpeed * delta * Math.max(0, blend);
+            disc.angle = normalizeAngle(disc.angle + coast + auto);
+            disc.angularVelocity = applyTurntableFriction(disc.angularVelocity, delta * 1.35);
+            if (Math.abs(disc.angularVelocity) < 0.06) {
+              disc.angularVelocity = 0;
+            }
           } else {
             disc.angularVelocity = 0;
             disc.angle = normalizeAngle(disc.angle + (disc.autoSpeed * delta));

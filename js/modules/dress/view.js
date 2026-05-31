@@ -44,7 +44,7 @@
   }
 
   function renderRoomBackground(state) {
-    var background = state && state.activeBackground;
+    var background = getDressPreviewBackground(state);
 
     if (!background) {
       return '<div class="dress-room-bg dress-room-bg--paper"></div>';
@@ -54,6 +54,38 @@
       '<img class="dress-room-bg__img" src="' + escapeHtml(background.src) +
         '" alt="" loading="lazy" decoding="async">'
     );
+  }
+
+  function getShopBackgrounds() {
+    if (root.state && typeof root.state.getShopBackgrounds === "function") {
+      return root.state.getShopBackgrounds();
+    }
+    return [];
+  }
+
+  function pickPreviewBackground() {
+    var list = getShopBackgrounds();
+    if (!list.length) {
+      return null;
+    }
+    return list[Math.floor(Math.random() * list.length)];
+  }
+
+  /** 仅装扮页预览用；未选背景时随机展示，不写入 state / snapshot。 */
+  function getDressPreviewBackground(state) {
+    if (state && state.activeBackground) {
+      return state.activeBackground;
+    }
+
+    if (!runtime) {
+      return pickPreviewBackground();
+    }
+
+    if (!runtime.previewBackground) {
+      runtime.previewBackground = pickPreviewBackground();
+    }
+
+    return runtime.previewBackground;
   }
 
   function renderRoomLayer(state) {
@@ -519,6 +551,7 @@
         shareCodeValue: "",
         shareModal: null,
         shareModalBound: false,
+        previewBackground: null,
         containerBound: false,
         panelBound: false,
         globalBound: false
@@ -1044,6 +1077,7 @@
       }
       runtime.shareModal = null;
       runtime.shareModalBound = false;
+      runtime.previewBackground = null;
       if (runtime.container && runtime.containerBound) {
         runtime.container.removeEventListener("click", handleContainerClick);
       }
@@ -1053,6 +1087,7 @@
     pause: function () {},
     resume: function () {
       if (!runtime) return;
+      root.state.syncFromFoodSelection(runtime.state);
       refresh(runtime.container, runtime.state);
     },
     initPanel: function () {

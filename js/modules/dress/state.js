@@ -120,6 +120,56 @@
     return raw && findById(SHOP_BACKGROUNDS, raw) ? raw : NONE;
   }
 
+  function getFoodTaste() {
+    return global.Yummi && global.Yummi.foodTaste;
+  }
+
+  function buildSelectionTasteProfile(names) {
+    var taste = getFoodTaste();
+
+    if (!taste || typeof taste.profileFromSelection !== "function" || !names.length) {
+      return null;
+    }
+
+    return taste.profileFromSelection(names).profile;
+  }
+
+  function pickTasteMatchedItemForCategory(category, profile, excludeSet) {
+    var items = ITEM_NAMES[category] || [];
+    var taste = getFoodTaste();
+    var bestName = NONE;
+    var bestScore = -1;
+    var i;
+    var itemName;
+    var score;
+
+    if (!items.length) {
+      return NONE;
+    }
+
+    if (!profile || !taste || typeof taste.matchScore !== "function") {
+      return items[0];
+    }
+
+    excludeSet = excludeSet || {};
+
+    for (i = 0; i < items.length; i += 1) {
+      itemName = items[i];
+      if (excludeSet[itemName]) {
+        continue;
+      }
+      score = taste.matchScore(profile, itemName);
+      if (score > bestScore) {
+        bestScore = score;
+        bestName = itemName;
+      } else if (score === bestScore && (!bestName || itemName < bestName)) {
+        bestName = itemName;
+      }
+    }
+
+    return bestName || items[0];
+  }
+
   function normalizeCatHouseId(raw) {
     return raw && findById(CAT_HOUSES, raw) ? raw : DEFAULT_CAT_HOUSE;
   }
@@ -315,24 +365,50 @@
 
   function syncDressFromFoodSelection(state) {
     var names;
-    var lastFood;
-    var lastCategory;
     var changed = false;
     var category;
     var next;
     var current;
+    var nextByCategory = {};
+    var assigned = {};
+    var tasteProfile;
+    var i;
+    var name;
+    var foodCategory;
 
     if (!state || syncLock) {
       return state;
     }
 
     names = getFoodSelectionNames();
-    lastFood = names.length ? names[names.length - 1] : "";
-    lastCategory = findCategoryForFood(lastFood);
+    tasteProfile = buildSelectionTasteProfile(names);
+
+    for (i = 0; i < names.length; i += 1) {
+      name = names[i];
+      foodCategory = findCategoryForFood(name);
+      if (foodCategory) {
+        nextByCategory[foodCategory] = name;
+        assigned[name] = true;
+      }
+    }
 
     CATEGORY_ORDER.forEach(function (category) {
-      next = category === lastCategory && lastFood ? lastFood : NONE;
       current = currentFor(category, state);
+
+      if (nextByCategory[category]) {
+        next = nextByCategory[category];
+      } else if (names.length) {
+        if (current) {
+          next = current;
+        } else {
+          next = pickTasteMatchedItemForCategory(category, tasteProfile, assigned);
+          if (next) {
+            assigned[next] = true;
+          }
+        }
+      } else {
+        next = NONE;
+      }
 
       if (current !== next) {
         state.selected[category] = next;
@@ -776,6 +852,9 @@
       return CATEGORY_ORDER.slice();
     },
     getSharePetName: sharePetName,
+    getShopBackgrounds: function () {
+      return SHOP_BACKGROUNDS.slice();
+    },
     reset: function (state) {
       if (!state) return;
       state.phase = "idle";
