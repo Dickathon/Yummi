@@ -1,0 +1,707 @@
+/* 好友页 — 日式极简 · 和风列表 */
+
+.friends-body {
+  background-color: var(--color-bg);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* 小鱼干币 */
+.friends-body .fish-coin {
+  top: 12px;
+  right: 12px;
+  left: auto;
+}
+
+.friends-page {
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--safe-top) 16px calc(24px + var(--safe-bottom));
+  animation: friendsFadeIn 0.5s var(--ease-standard) forwards;
+}
+
+@keyframes friendsFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 顶部标题 */
+.friends-header {
+  position: relative;
+  padding: 16px 0 20px;
+}
+
+.friends-back {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  transition: color var(--transition-fast);
+  z-index: 5;
+}
+
+.friends-back:active {
+  color: var(--color-primary);
+}
+
+.friends-back svg {
+  stroke: currentColor;
+}
+
+.friends-title {
+  font-size: 1.5rem;
+  text-align: center;
+  letter-spacing: var(--letter-title);
+}
+
+.friends-subtitle {
+  text-align: center;
+  margin-top: 4px;
+  font-size: 0.8rem;
+}
+
+/* 好友列表 */
+.friends-list {
+  animation: sectionIn 0.35s var(--ease-standard);
+}
+
+@keyframes sectionIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 好友卡片 */
+.friends-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-rest);
+  margin-bottom: 12px;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.friends-card:active {
+  transform: scale(0.98);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.friends-card__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.friends-card__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-paper);
+  border: 2px solid var(--color-accent-light);
+}
+
+.friends-card__affinity-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -2px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: var(--font-weight-stat);
+  color: #fff;
+  background: var(--color-primary);
+  border: 2px solid var(--color-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(92, 75, 58, 0.2);
+}
+
+.friends-card__affinity-badge[data-affinity^="9"],
+.friends-card__affinity-badge[data-affinity="100"] {
+  background: #8fbc8f;
+}
+
+.friends-card__affinity-badge[data-affinity^="8"] {
+  background: #7a9e7a;
+}
+
+.friends-card__affinity-badge[data-affinity^="7"] {
+  background: #c4a882;
+}
+
+.friends-card__affinity-badge[data-affinity^="6"] {
+  background: #b8956e;
+}
+
+.friends-card__affinity-badge[data-affinity^="5"] {
+  background: #c4946a;
+}
+
+.friends-card__affinity-badge[data-affinity^="4"] {
+  background: #c48a6a;
+}
+
+.friends-card__affinity-badge[data-affinity^="3"] {
+  background: #c4806a;
+}
+
+.friends-card__affinity-badge[data-affinity^="2"] {
+  background: #c4766a;
+}
+
+.friends-card__affinity-badge[data-affinity^="1"],
+.friends-card__affinity-badge[data-affinity^="0"] {
+  background: #c46a6a;
+}
+
+.friends-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.friends-card__name {
+  font-size: 1rem;
+  font-weight: var(--font-weight-stat);
+  color: var(--color-primary);
+  letter-spacing: var(--letter-body);
+  line-height: 1.3;
+}
+
+.friends-card__bio {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friends-card__meta {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+}
+
+.friends-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.friends-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.friends-card__btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--letter-caption);
+  white-space: nowrap;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.friends-card__btn:active {
+  transform: scale(0.95);
+}
+
+.friends-card__btn--primary {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.friends-card__btn--secondary {
+  background: var(--color-paper);
+  color: var(--color-primary);
+}
+
+/* 亲密度条 */
+.friends-card__affinity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.friends-card__affinity-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+.friends-card__affinity-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c4a882, #8fbc8f);
+  transition: width 0.5s var(--ease-standard);
+}
+
+.friends-card__affinity-text {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* 私信聊天界面 */
+.friends-msg {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.friends-msg[aria-hidden="false"] {
+  pointer-events: auto;
+}
+
+.friends-msg__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.friends-msg[aria-hidden="false"] .friends-msg__overlay {
+  opacity: 1;
+}
+
+.friends-msg__sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 85vh;
+  background: var(--color-bg);
+  border-radius: 24px 24px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.35s var(--ease-standard);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.friends-msg[aria-hidden="false"] .friends-msg__sheet {
+  transform: translateY(0);
+}
+
+/* 聊天顶部栏 */
+.friends-msg__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-paper);
+  flex-shrink: 0;
+  background: var(--color-card);
+}
+
+.friends-msg__back {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  background: var(--color-paper);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.friends-msg__back:active {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.friends-msg__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-accent-light);
+  flex-shrink: 0;
+}
+
+.friends-msg__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.friends-msg__name {
+  font-size: 1rem;
+  font-weight: var(--font-weight-stat);
+  color: var(--color-primary);
+}
+
+.friends-msg__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--color-text-muted);
+  background: var(--color-paper);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.friends-msg__close:active {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+/* 消息列表 */
+.friends-msg__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 消息气泡 */
+.friends-msg__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 85%;
+}
+
+.friends-msg__row--me {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.friends-msg__row--them {
+  align-self: flex-start;
+}
+
+.friends-msg__bubble-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-accent-light);
+}
+
+.friends-msg__bubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-break: break-word;
+  box-shadow: var(--shadow-rest);
+  animation: bubbleIn 0.25s var(--ease-standard);
+}
+
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.friends-msg__row--me .friends-msg__bubble {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  border-bottom-right-radius: 4px;
+}
+
+.friends-msg__row--them .friends-msg__bubble {
+  background: var(--color-card);
+  color: var(--color-text);
+  border-bottom-left-radius: 4px;
+}
+
+.friends-msg__time {
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  text-align: right;
+}
+
+.friends-msg__row--them .friends-msg__time {
+  text-align: left;
+}
+
+/* 底部输入栏 */
+.friends-msg__composer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px calc(10px + var(--safe-bottom));
+  border-top: 1px solid var(--color-paper);
+  background: var(--color-card);
+  flex-shrink: 0;
+}
+
+.friends-msg__input {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--color-accent-light);
+  background: var(--color-bg);
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.4;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.friends-msg__input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(92, 75, 58, 0.08);
+}
+
+.friends-msg__input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.friends-msg__send {
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--letter-caption);
+  color: var(--color-bg);
+  background: var(--color-primary);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.friends-msg__send:active {
+  transform: scale(0.96);
+}
+
+/* 拜访视图 — 店铺内部 + 小猫 */
+.friends-visit {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  pointer-events: none;
+}
+
+.friends-visit[aria-hidden="false"] {
+  pointer-events: auto;
+}
+
+.friends-visit__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg);
+  opacity: 0;
+  transition: opacity 0.35s;
+}
+
+.friends-visit[aria-hidden="false"] .friends-visit__overlay {
+  opacity: 1;
+}
+
+.friends-visit__stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.4s 0.1s, transform 0.4s 0.1s var(--ease-standard);
+}
+
+.friends-visit[aria-hidden="false"] .friends-visit__stage {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.friends-visit__back {
+  position: absolute;
+  top: calc(var(--safe-top) + 12px);
+  left: 12px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  color: var(--color-primary);
+  background: rgba(245, 240, 232, 0.9);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-rest);
+  transition: transform var(--transition-fast);
+}
+
+.friends-visit__back:active {
+  transform: scale(0.95);
+}
+
+.friends-visit__shop {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.friends-visit__shop svg,
+.friends-visit__shop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.friends-visit__cat {
+  position: absolute;
+  z-index: 5;
+  cursor: pointer;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+}
+
+.friends-visit__label {
+  position: absolute;
+  bottom: calc(24px + var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-rest);
+  white-space: nowrap;
+}
+
+/* 小猫交互面板 */
+.friends-catbar {
+  position: absolute;
+  z-index: 20;
+  opacity: 0;
+  transform: translateY(6px) scale(0.95);
+  transition: opacity 0.25s, transform 0.25s var(--ease-standard);
+  pointer-events: none;
+}
+
+.friends-catbar[aria-hidden="false"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.friends-catbar__arrow {
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid var(--color-card);
+  margin: 0 auto;
+  filter: drop-shadow(0 -1px 1px rgba(92, 75, 58, 0.06));
+}
+
+.friends-catbar__body {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--color-card);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(92, 75, 58, 0.12);
+}
+
+.friends-catbar__btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--letter-caption);
+  white-space: nowrap;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.friends-catbar__btn:active {
+  transform: scale(0.93);
+}
+
+.friends-catbar__btn--feed {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
+
+.friends-catbar__btn--pet {
+  background: var(--color-paper);
+  color: var(--color-primary);
+}
+
+/* Toast 提示 */
+.friends-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.92);
+  z-index: 300;
+  padding: 12px 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-primary);
+  color: var(--color-bg);
+  font-size: 0.85rem;
+  letter-spacing: var(--letter-caption);
+  box-shadow: var(--shadow-lift);
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s var(--ease-standard);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.friends-toast--show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}

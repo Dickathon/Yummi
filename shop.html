@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <title>店铺详情 - Yummi</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shop.css">
+</head>
+<body class="shop-body">
+  <div class="fish-coin" id="fishCoinBar" title="小鱼干币"></div>
+
+  <div class="shop-page" id="shopPage">
+    <a href="social-map.html" class="shop-back" aria-label="返回">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      <span>返回</span>
+    </a>
+
+    <div class="shop-bg">
+      <img class="shop-bg__img" id="shopBgImg" src="" alt="" loading="eager">
+      <div class="shop-bg__overlay"></div>
+      <div class="shop-cats" id="shopCats"></div>
+    </div>
+
+    <!-- 小猫头上弹窗 -->
+    <div class="shop-popup" id="shopPopup" aria-hidden="true">
+      <div class="shop-popup__arrow"></div>
+      <div class="shop-popup__body" id="shopPopupBody"></div>
+    </div>
+
+    <!-- 自动留言 bar 容器（动态生成多只） -->
+    <div class="shop-toast-layer" id="shopToastLayer"></div>
+
+    <!-- 口味比对弹窗 -->
+    <div class="shop-compare" id="shopComparePanel" aria-hidden="true">
+      <div class="shop-compare__overlay" id="shopCompareOverlay"></div>
+      <section class="shop-compare__sheet" role="dialog" aria-modal="true" aria-labelledby="shopCompareTitle">
+        <div class="shop-compare__header">
+          <div>
+            <p class="shop-compare__eyebrow">YUMMY CODE MATCH</p>
+            <h2 class="shop-compare__title" id="shopCompareTitle">口味比对</h2>
+          </div>
+          <button type="button" class="shop-compare__close" id="shopCompareClose" aria-label="关闭">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="shop-compare__body" id="shopCompareBody"></div>
+      </section>
+    </div>
+
+
+  </div>
+
+  <script src="js/data/foods.js"></script>
+  <script src="js/data/food-taste-db.js"></script>
+  <script src="js/data/food-taste.js"></script>
+  <script src="js/data/food-personality.js"></script>
+  <script src="js/data/food-roasts.js"></script>
+  <script src="js/data/food-selection-codec.js"></script>
+  <script src="js/data/food-pet-appearance.js"></script>
+  <script src="js/data/food-selection.js"></script>
+  <script src="js/modules/dress/config.js"></script>
+  <script src="js/modules/dress/state.js"></script>
+  <script src="js/data/yummy-code.js"></script>
+  <script src="js/fish-coins.js"></script>
+  <script src="js/shop.js"></script>
+</body>
+</html>

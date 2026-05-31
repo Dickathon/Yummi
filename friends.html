@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <title>好友 - Yummi</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/friends.css">
+</head>
+<body class="friends-body">
+  <div class="fish-coin" id="fishCoinBar" title="小鱼干币"></div>
+
+  <div class="friends-page" id="friendsPage">
+    <header class="friends-header">
+      <a href="social-map.html" class="friends-back" aria-label="返回">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>返回</span>
+      </a>
+      <h1 class="friends-title">好友</h1>
+      <p class="friends-subtitle">与小猫伙伴们相遇的地方</p>
+    </header>
+
+    <main class="friends-main" id="friendsMain">
+      <div class="friends-list" id="friendsList"></div>
+    </main>
+  </div>
+
+  <!-- 拜访视图 — 店铺内部 + 小猫 -->
+  <div class="friends-visit" id="friendsVisit" aria-hidden="true">
+    <div class="friends-visit__overlay" id="friendsVisitOverlay"></div>
+    <div class="friends-visit__stage">
+      <button type="button" class="friends-visit__back" id="friendsVisitBack" aria-label="返回">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>返回</span>
+      </button>
+      <div class="friends-visit__shop" id="friendsVisitShop"></div>
+      <img class="friends-visit__cat" id="friendsVisitCat" src="" alt="">
+      <!-- 小猫交互面板 -->
+      <div class="friends-catbar" id="friendsCatBar" aria-hidden="true">
+        <div class="friends-catbar__arrow"></div>
+        <div class="friends-catbar__body">
+          <button type="button" class="friends-catbar__btn friends-catbar__btn--feed" data-cataction="feed" id="friendsCatFeed">🐟 投喂</button>
+          <button type="button" class="friends-catbar__btn friends-catbar__btn--pet" data-cataction="pet" id="friendsCatPet">🖐 抚摸</button>
+        </div>
+      </div>
+      <div class="friends-visit__label" id="friendsVisitLabel"></div>
+    </div>
+  </div>
+
+  <!-- 私信聊天界面 -->
+  <div class="friends-msg" id="friendsMsg" aria-hidden="true">
+    <div class="friends-msg__overlay" id="friendsMsgOverlay"></div>
+    <div class="friends-msg__sheet">
+      <div class="friends-msg__header">
+        <button type="button" class="friends-msg__back" id="friendsMsgBack" aria-label="返回">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <img class="friends-msg__avatar" id="friendsMsgAvatar" src="" alt="">
+        <div class="friends-msg__info">
+          <div class="friends-msg__name" id="friendsMsgName"></div>
+        </div>
+        <button type="button" class="friends-msg__close" id="friendsMsgClose" aria-label="关闭">×</button>
+      </div>
+      <div class="friends-msg__messages" id="friendsMsgMessages"></div>
+      <div class="friends-msg__composer">
+        <input type="text" class="friends-msg__input" id="friendsMsgInput" placeholder="想说点什么…">
+        <button type="button" class="friends-msg__send" id="friendsMsgSend">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/fish-coins.js"></script>
+  <script src="js/friends.js"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <title>食物圈 - Yummi</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/food-circle.css">
+</head>
+<body class="fc-body">
+  <div class="fc-page" id="fcPage">
+    <a href="social-map.html" class="fc-back" aria-label="返回">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      <span>返回</span>
+    </a>
+
+    <div class="fc-bg">
+      <img class="fc-bg__img" id="fcBgImg" src="" alt="" loading="eager">
+      <div class="fc-bg__overlay"></div>
+    </div>
+
+    <div class="fc-content">
+      <h1 class="fc-title">食物圈</h1>
+      <div class="fc-grid">
+        <button type="button" class="fc-card" id="fcInbox">
+          <span class="fc-card__icon" aria-hidden="true">✉</span>
+          <span class="fc-card__label">收信箱</span>
+        </button>
+        <button type="button" class="fc-card" id="fcPreference">
+          <span class="fc-card__icon" aria-hidden="true">◆</span>
+          <span class="fc-card__label">我的偏好</span>
+        </button>
+        <button type="button" class="fc-card" id="fcFeed">
+          <span class="fc-card__icon" aria-hidden="true">✦</span>
+          <span class="fc-card__label">投喂</span>
+        </button>
+        <button type="button" class="fc-card" id="fcEarnings">
+          <span class="fc-card__icon" aria-hidden="true">🐟</span>
+          <span class="fc-card__label">鱼干收益</span>
+        </button>
+      </div>
+    </div>
+
+    <section class="fc-feeding" id="fcFeeding" aria-label="宠物投喂">
+      <div class="fc-feeding__shell">
+        <div class="fc-feeding__pet-card">
+          <p class="fc-feeding__eyebrow">今日投喂</p>
+          <div class="fc-pet-bubble" id="fcPetBubble" aria-live="polite" aria-hidden="true"></div>
+          <div class="fc-pet-stage" id="fcPetStage" role="img" aria-label="当前宠物形象"></div>
+        </div>
+        <div class="fc-food-list" id="fcFoodList" role="list"></div>
+        <p class="fc-feed-status" id="fcFeedStatus" aria-live="polite"></p>
+      </div>
+    </section>
+  </div>
+
+  <!-- 小鱼干币 -->
+  <div class="fish-coin" id="fishCoinBar" title="小鱼干币"></div>
+
+  <!-- 口味偏好面板 -->
+  <div class="fc-pref" id="fcPrefPanel" aria-hidden="true">
+    <div class="fc-pref__overlay" id="fcPrefOverlay"></div>
+    <div class="fc-pref__sheet" id="fcPrefSheet">
+      <div class="fc-pref__header">
+        <h2 class="fc-pref__title">我的口味画像</h2>
+        <button type="button" class="fc-pref__close" id="fcPrefClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="fc-pref__body" id="fcPrefBody"></div>
+    </div>
+  </div>
+
+  <!-- 收信箱面板 -->
+  <div class="fc-inbox" id="fcInboxPanel" aria-hidden="true">
+    <div class="fc-inbox__overlay" id="fcInboxOverlay"></div>
+    <div class="fc-inbox__sheet" id="fcInboxSheet">
+      <div class="fc-inbox__header">
+        <h2 class="fc-inbox__title">收信箱</h2>
+        <button type="button" class="fc-inbox__close" id="fcInboxClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="fc-inbox__list" id="fcInboxList"></div>
+    </div>
+  </div>
+
+  <!-- 鱼干收益面板 -->
+  <div class="fc-earnings" id="fcEarningsPanel" aria-hidden="true">
+    <div class="fc-earnings__overlay" id="fcEarningsOverlay"></div>
+    <div class="fc-earnings__sheet" id="fcEarningsSheet">
+      <div class="fc-earnings__header">
+        <h2 class="fc-earnings__title">鱼干收益</h2>
+        <button type="button" class="fc-earnings__close" id="fcEarningsClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="fc-earnings__body" id="fcEarningsBody"></div>
+    </div>
+  </div>
+
+  <!-- 口味计算依赖 -->
+  <script src="js/data/foods.js"></script>
+  <script src="js/data/food-taste-db.js"></script>
+  <script src="js/data/food-taste.js"></script>
+  <script src="js/data/food-personality.js"></script>
+  <script src="js/data/food-roasts.js"></script>
+  <script src="js/modules/dress/config.js"></script>
+  <script src="js/modules/dress/state.js"></script>
+  <script src="js/data/yummy-code.js"></script>
+
+  <!-- 小鱼干币 -->
+  <script src="js/fish-coins.js"></script>
+
+  <script src="js/food-circle.js"></script>
+</body>
+</html>

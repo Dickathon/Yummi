@@ -1,0 +1,149 @@
+/* 底部导航 — 毛玻璃、和纸白底边、选中下划线动画 style.md */
+.tab-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%) translateZ(0);
+  /* 高于各模块引导遮罩（330），避免首次进入时被挡住无法切换 Tab */
+  z-index: 400;
+  isolation: isolate;
+  pointer-events: auto;
+  width: 100%;
+  max-width: var(--layout-max-width);
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  gap: 6px;
+  padding:
+    10px 14px
+    calc(10px + var(--safe-bottom))
+    14px;
+  background: rgba(245, 240, 232, 0.94);
+  border-top: 1px solid var(--color-paper);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    background-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.tab-bar--scrolled {
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 -4px 24px rgba(92, 75, 58, 0.06);
+}
+
+.tab-bar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 54px;
+  padding: 6px 8px;
+  border-radius: var(--radius-nav-item);
+  color: var(--color-text-muted);
+  letter-spacing: var(--letter-caption);
+  transition:
+    color var(--transition-fast),
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.tab-bar__item:active {
+  transform: scale(0.96);
+}
+
+.tab-bar__item--active {
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-paper) 50%, transparent);
+}
+
+.tab-bar__label {
+  position: relative;
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  padding-bottom: 2px;
+}
+
+.tab-bar__label::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--color-accent-light);
+  transition: width var(--transition-base);
+}
+
+.tab-bar__item--active .tab-bar__label {
+  font-weight: 500;
+}
+
+.tab-bar__item--active .tab-bar__label::after {
+  width: 100%;
+}
+
+.tab-bar__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.tab-bar__icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+  flex-shrink: 0;
+}
+
+.tab-bar__icon-wrap--fallback {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--color-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-bar__icon-wrap--fallback[data-tab="order"]::before {
+  content: "餐";
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+.tab-bar__icon-wrap--fallback[data-tab="dress"]::before {
+  content: "扮";
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+.tab-bar__icon-wrap--fallback[data-tab="social"]::before {
+  content: "友";
+  font-size: 14px;
+  color: var(--color-primary);
+}
+
+@keyframes tab-pet-land {
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.18);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.tab-bar__item--pet-received .tab-bar__icon-wrap {
+  animation: tab-pet-land 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -1,0 +1,81 @@
+(function (global) {
+  "use strict";
+  global.Yummi.modules = global.Yummi.modules || {};
+  var root = global.Yummi.modules.order = global.Yummi.modules.order || {};
+  /** Synced from source/compressed/10kb — run: node js/modules/dress/scripts/gen-items-catalog.mjs */
+  root.itemsCatalog = {
+  "food1": [
+    "food1/九转大肠-10kb.webp",
+    "food1/兰州拉面-10kb.webp",
+    "food1/冬阴功汤-10kb.webp",
+    "food1/刀削面-10kb.webp",
+    "food1/刺身-10kb.webp",
+    "food1/剁椒鱼头-10kb.webp",
+    "food1/北京烤鸭-10kb.webp",
+    "food1/咖喱饭-10kb.webp",
+    "food1/回锅肉-10kb.webp",
+    "food1/大盘鸡-10kb.webp",
+    "food1/小炒黄牛肉-10kb.webp",
+    "food1/小鸡炖蘑菇-10kb.webp",
+    "food1/手抓羊肉-10kb.webp",
+    "food1/披萨-10kb.webp",
+    "food1/春卷-10kb.webp",
+    "food1/汉堡-10kb.webp",
+    "food1/海蛎煎-10kb.webp",
+    "food1/火锅-10kb.webp",
+    "food1/炒腊肉-10kb.webp",
+    "food1/炸酱面-10kb.webp",
+    "food1/炸鸡-10kb.webp",
+    "food1/烤串-10kb.webp",
+    "food1/烧鹅-10kb.webp",
+    "food1/牛排-10kb.webp",
+    "food1/瓦罐汤-10kb.webp",
+    "food1/石锅拌饭-10kb.webp",
+    "food1/糖醋排骨-10kb.webp",
+    "food1/红烧肉-10kb.webp",
+    "food1/羊肉泡馍-10kb.webp",
+    "food1/肠粉-10kb.webp",
+    "food1/胡辣汤-10kb.webp",
+    "food1/臭豆腐-10kb.webp",
+    "food1/蒸螃蟹-10kb.webp",
+    "food1/蔬菜沙拉-10kb.webp",
+    "food1/薯条-10kb.webp",
+    "food1/螺蛳粉-10kb.webp",
+    "food1/酸菜鱼-10kb.webp",
+    "food1/酸辣粉-10kb.webp",
+    "food1/锅包肉-10kb.webp",
+    "food1/鹅肝-10kb.webp",
+    "food1/麻辣小龙虾-10kb.webp"
+  ],
+  "food2": [
+    "food2/固体杨枝甘露-10kb.webp",
+    "food2/奶油蛋糕-10kb.webp",
+    "food2/榴莲制品-10kb.webp",
+    "food2/水果捞-10kb.webp",
+    "food2/焦糖布丁-10kb.webp",
+    "food2/芒果冰沙-10kb.webp",
+    "food2/葡式蛋挞-10kb.webp",
+    "food2/话梅-10kb.webp",
+    "food2/酸嘢-10kb.webp",
+    "food2/香草冰淇淋-10kb.webp",
+    "food2/黄油曲奇-10kb.webp",
+    "food2/黑巧克力-10kb.webp"
+  ],
+  "food3": [
+    "food3/冰红茶-10kb.webp",
+    "food3/冰镇酸梅汤-10kb.webp",
+    "food3/可乐-10kb.webp",
+    "food3/姜糖水-10kb.webp",
+    "food3/抹茶奶茶-10kb.webp",
+    "food3/牛奶-10kb.webp",
+    "food3/珍珠奶茶-10kb.webp",
+    "food3/碳酸-10kb.webp",
+    "food3/美式咖啡-10kb.webp",
+    "food3/酸奶-10kb.webp",
+    "food3/雪碧-10kb.webp",
+    "food3/青岛啤酒-10kb.webp",
+    "food3/鸡尾酒-10kb.webp",
+    "food3/龙井茶-10kb.webp"
+  ]
+};
+})(typeof window !== "undefined" ? window : this);

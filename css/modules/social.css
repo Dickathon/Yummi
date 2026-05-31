@@ -1,0 +1,7 @@
+/* 社交模块样式 */
+
+.social-module .social-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-card);
+}

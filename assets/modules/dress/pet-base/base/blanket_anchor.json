@@ -1,0 +1,63 @@
+{
+  "source": "assets/modules/dress/pet-base/标准底图/legs_1254.png",
+  "legs_bbox": [
+    204,
+    683,
+    897,
+    1132
+  ],
+  "paws": [
+    {
+      "centerX": 296,
+      "centerY": 1056,
+      "bottomY": 1122,
+      "left": 215,
+      "right": 377
+    },
+    {
+      "centerX": 434,
+      "centerY": 1061,
+      "bottomY": 1132,
+      "left": 377,
+      "right": 491
+    },
+    {
+      "centerX": 626,
+      "centerY": 1024,
+      "bottomY": 1059,
+      "left": 555,
+      "right": 697
+    },
+    {
+      "centerX": 820,
+      "centerY": 1038,
+      "bottomY": 1087,
+      "left": 756,
+      "right": 883
+    }
+  ],
+  "ellipse": {
+    "centerX": 558,
+    "centerY": 1060,
+    "semiA": 387,
+    "semiB": 217,
+    "pawSpan": {
+      "left": 215,
+      "right": 883,
+      "spanX": 668
+    }
+  },
+  "bbox": [
+    171,
+    843,
+    945,
+    1253
+  ],
+  "template_bbox": [
+    171,
+    843,
+    945,
+    1253
+  ],
+  "canvas": 1254
+}
