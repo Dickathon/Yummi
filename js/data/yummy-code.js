@@ -539,6 +539,69 @@
     };
   }
 
+  function renderImportHero(analysis, escape) {
+    var esc = typeof escape === "function"
+      ? escape
+      : function (value) {
+          return String(value == null ? "" : value);
+        };
+    var preview = analysis && analysis.preview ? analysis.preview : null;
+    var layers = preview && preview.layers ? preview.layers : [];
+    var drink = preview && preview.drink ? preview.drink : null;
+    var personality = analysis && analysis.personality ? analysis.personality : null;
+    var petName = preview && preview.petDisplayName ? preview.petDisplayName : "Ta 的哈基米";
+    var stageHtml = "";
+    var i;
+
+    stageHtml += '<div class="shop-compare__stage">';
+    stageHtml += '<div class="shop-compare__aura" aria-hidden="true"></div>';
+
+    if (layers.length) {
+      for (i = 0; i < layers.length; i += 1) {
+        stageHtml +=
+          '<img class="shop-compare__layer" src="' + esc(layers[i].src) + '"' +
+            ' alt="' + esc(layers[i].label || "哈基米图层") + '"' +
+            ' loading="lazy" decoding="async">';
+      }
+    } else {
+      stageHtml += '<div class="shop-compare__fallback" aria-hidden="true">🐾</div>';
+    }
+
+    if (drink && drink.src) {
+      stageHtml +=
+        '<div class="shop-compare__drink">' +
+          '<img src="' + esc(drink.src) + '" alt="' + esc(drink.name || "饮品") + '" loading="lazy" decoding="async">' +
+          '<span>' + esc(drink.name || "") + "</span>" +
+        "</div>";
+    }
+
+    stageHtml += "</div>";
+
+    return (
+      '<section class="shop-compare__hero">' +
+        stageHtml +
+        '<div class="shop-compare__persona">' +
+          '<p class="shop-compare__persona-kicker">宠物形象</p>' +
+          '<h3 class="shop-compare__pet-name">' + esc(petName) + "</h3>" +
+          (
+            personality
+              ? '<div class="shop-compare__mbti">' +
+                  '<span class="shop-compare__mbti-tag">MBTI</span>' +
+                  '<strong class="shop-compare__mbti-name">' + esc(personality.code || personality.name || "未知人格") + "</strong>" +
+                  '<p class="shop-compare__mbti-line">' + esc((personality.name || "") + (personality.oneLiner ? " · " + personality.oneLiner : "")) + "</p>" +
+                "</div>"
+              : '<p class="shop-compare__mbti-line">这只猫还没有可读的人格标签。</p>'
+          ) +
+          (
+            analysis && analysis.reasonSummary
+              ? '<p class="shop-compare__reason">' + esc(analysis.reasonSummary) + "</p>"
+              : ""
+          ) +
+        "</div>" +
+      "</section>"
+    );
+  }
+
   function buildSharePayload() {
     var foodSelection = getFoodSelectionApi();
     var dressState = getDressStateApi();
@@ -576,6 +639,7 @@
     encodeShare: encodeShare,
     decodeShare: decodeShare,
     buildSharePayload: buildSharePayload,
-    analyzeSharedTaste: analyzeSharedTaste
+    analyzeSharedTaste: analyzeSharedTaste,
+    renderImportHero: renderImportHero
   };
 })(typeof window !== "undefined" ? window : this);

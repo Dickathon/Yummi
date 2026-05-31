@@ -333,6 +333,46 @@
   }
 
   /**
+   * 用户最后一次选择（选菜顺序末项，装扮同步以此为准）
+   * @returns {string}
+   */
+  function getLastFood() {
+    return names.length ? names[names.length - 1] : "";
+  }
+
+  /**
+   * 将已有选菜移到末尾，或新增一道菜（作为最后一次选择）
+   * @param {string} name
+   */
+  function touchLast(name) {
+    var n = trimName(name);
+    var valid;
+    var i;
+
+    if (!n) {
+      return { ok: false, error: "empty_name" };
+    }
+
+    valid = buildValidSet();
+    if (!valid[n]) {
+      return { ok: false, error: "unknown_food", name: n };
+    }
+
+    for (i = 0; i < names.length; i += 1) {
+      if (names[i] === n) {
+        names.splice(i, 1);
+        break;
+      }
+    }
+
+    names.push(n);
+    invalidateProfile();
+    persist();
+    emitChange("touchLast");
+    return { ok: true, names: names.slice(), count: names.length, moved: true };
+  }
+
+  /**
    * 确认选菜：推算口味画像（数据层）并解析宠物形象（预留接口，以第一选择为准）
    * @returns {{
    *   ok: boolean,
@@ -423,6 +463,8 @@
     toggle: toggle,
     clear: clear,
     getPrimaryFood: getPrimaryFood,
+    getLastFood: getLastFood,
+    touchLast: touchLast,
     getProfile: getProfile,
     confirm: confirm,
     exportCode: exportCode,

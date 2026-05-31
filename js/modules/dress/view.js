@@ -251,15 +251,14 @@
 
   function getWardrobeStatusText(item) {
     if (item.status === "wearing") return "穿着中";
-    if (item.status === "locked") return (item.price || 2) + "小鱼干";
     if (!item.name) return "可选择";
-    return "已购买";
+    return "可更换";
   }
 
   function getWardrobeAriaLabel(item, label) {
     if (item.status === "wearing") return label + "，正在穿着";
-    if (item.status === "locked") return label + "，未购买，点击花费" + (item.price || 2) + "个小鱼干购买并穿上";
-    return label + "，已购买，点击穿上";
+    if (!item.name) return label + "，点击取消该类装扮";
+    return label + "，点击穿上并与点餐同步";
   }
 
   function renderWardrobeItem(item) {
@@ -295,13 +294,13 @@
   function renderWardrobeCategory(group) {
     var items = group.items || [];
     var realItems = items.filter(function (item) { return item.name; });
-    var ownedCount = realItems.filter(function (item) { return item.owned; }).length;
+    var ownedCount = realItems.filter(function (item) { return item.active; }).length;
 
     return (
       '<section class="dress-wardrobe-row" aria-label="' + escapeHtml(group.category) + '">' +
         '<div class="dress-wardrobe-row__head">' +
           '<h3 class="dress-wardrobe-row__title">' + escapeHtml(group.category) + "</h3>" +
-          '<span class="dress-wardrobe-row__count">已购 ' + ownedCount + " / " + realItems.length + "</span>" +
+          '<span class="dress-wardrobe-row__count">使用中 ' + ownedCount + " / " + realItems.length + "</span>" +
         "</div>" +
         '<div class="dress-wardrobe-row__items">' +
           items.map(renderWardrobeItem).join("") +
@@ -315,7 +314,7 @@
 
     return (
       '<section class="dress-wardrobe" aria-label="装扮衣柜">' +
-        '<p class="dress-wardrobe__hint">点餐选中的菜会自动解锁对应装扮；每类前 2 件默认拥有，其余每件 2 个小鱼干。</p>' +
+        '<p class="dress-wardrobe__hint">点餐可选多道菜，装扮只展示最后一次选择对应部件。</p>' +
         '<div class="dress-wardrobe__rows">' +
           groups.map(renderWardrobeCategory).join("") +
         "</div>" +
@@ -450,6 +449,12 @@
     }
   }
 
+  function applyWardrobeThumbFocus(scope) {
+    if (root.thumbFocus && typeof root.thumbFocus.applyAll === "function") {
+      root.thumbFocus.applyAll(scope);
+    }
+  }
+
   function refreshWardrobeFull(state) {
     var synced = root.state.sync(state);
     var scrollPositions;
@@ -461,6 +466,7 @@
     scrollPositions = captureWardrobeScroll(runtime.panelBody);
     runtime.panelBody.innerHTML = renderWardrobe(synced);
     restoreWardrobeScroll(runtime.panelBody, scrollPositions);
+    applyWardrobeThumbFocus(runtime.panelBody);
   }
 
   function refresh(container, state, options) {
@@ -615,6 +621,7 @@
     }
 
     rt.panelBody.innerHTML = renderWardrobe(rt.state);
+    applyWardrobeThumbFocus(rt.panelBody);
   }
 
   function bindGlobalSelectionEvent() {
@@ -628,8 +635,6 @@
     var btn = event.target.closest("[data-dress-wardrobe-item]");
     var category;
     var name;
-    var status;
-    var result;
 
     if (!btn || !runtime) {
       return;
@@ -638,40 +643,9 @@
     event.preventDefault();
     category = btn.getAttribute("data-category") || "";
     name = btn.getAttribute("data-name") || "";
-    status = btn.getAttribute("data-status") || "";
 
-    if (status === "locked") {
-      result = root.state.purchaseAndSelect(runtime.state, category, name);
-      if (!result || !result.ok) {
-        showPurchaseFailure(result);
-        return;
-      }
-      if (result.purchased) {
-        refreshFishCoins();
-      }
-    } else {
-      root.state.select(runtime.state, category, name);
-    }
-
+    root.state.select(runtime.state, category, name);
     refresh(runtime.container, runtime.state, { wardrobe: "patch" });
-  }
-
-  function refreshFishCoins() {
-    var wallet = global.Yummi && global.Yummi.fishCoins;
-    if (wallet && typeof wallet.render === "function") {
-      wallet.render("fishCoinBar");
-    }
-  }
-
-  function showPurchaseFailure(result) {
-    var price = result && result.price ? result.price : 2;
-    var message = result && result.reason === "wallet_unavailable"
-      ? "小鱼干钱包还没有加载完成，请稍后再试。"
-      : "小鱼干不够啦，需要 " + price + " 个小鱼干才能购买这个装扮。";
-
-    if (typeof global.alert === "function") {
-      global.alert(message);
-    }
   }
 
   function handleContainerClick(event) {
@@ -883,6 +857,9 @@
     if (message === "canvas_context_unavailable") {
       return "生成失败：当前浏览器不支持 Canvas。";
     }
+    if (message === "canvas_export_tainted") {
+      return "生成失败：图片资源跨域限制，请通过本地服务器打开页面后重试。";
+    }
     return "生成失败：图片导出遇到问题，请重试一次。";
   }
 
@@ -1002,6 +979,7 @@
 
   function handleFoodSelectionChange() {
     if (!runtime) return;
+    root.state.syncFromFoodSelection(runtime.state);
     refresh(runtime.container, runtime.state);
   }
 

@@ -703,6 +703,10 @@
   padding-right: 2px;
 }
 
+.fc-share-preview__body .shop-compare__hero {
+  width: 100%;
+}
+
 .fc-share-preview__hero {
   display: grid;
   gap: 12px;

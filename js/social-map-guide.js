@@ -102,6 +102,11 @@
     btn.setAttribute("data-map-help-bound", "1");
     btn.addEventListener("click", function (event) {
       event.preventDefault();
+      var guides = global.Yummi && global.Yummi.guides;
+      if (guides && typeof guides.refreshAll === "function") {
+        guides.refreshAll();
+        return;
+      }
       replayAll();
     });
   }

@@ -1217,6 +1217,7 @@ html.order-guide-open {
 .turntable-placard-presence,
 .turntable-placard-rise,
 .turntable-slot-image,
+.turntable-slot-frame,
 .turntable-slot-base {
   pointer-events: none;
 }
@@ -1234,14 +1235,26 @@ html.order-guide-open {
 }
 
 .turntable-slot--selected .turntable-slot-base {
-  fill: color-mix(in srgb, var(--color-sakura) 55%, var(--color-paper));
-  stroke: var(--color-primary);
-  stroke-width: 1.6;
+  fill: color-mix(in srgb, var(--sector-color, var(--color-paper)) 72%, white);
+  stroke: color-mix(in srgb, var(--sector-color, var(--color-primary)) 58%, #5c4b3a);
+  stroke-width: 2;
+}
+
+.turntable-slot--selected .turntable-slot-frame {
+  opacity: 1;
+  stroke: color-mix(in srgb, var(--sector-color, var(--color-primary)) 62%, #5c4b3a);
+  stroke-width: 2.6;
+}
+
+.turntable-slot-frame {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .turntable-slot--selected .turntable-food-tag__bg {
-  stroke: var(--color-primary);
-  stroke-width: 1.4;
+  fill: color-mix(in srgb, var(--sector-color, var(--color-paper)) 55%, white);
+  stroke: color-mix(in srgb, var(--sector-color, var(--color-primary)) 58%, #5c4b3a);
+  stroke-width: 1.6;
 }
 
 .turntable-slot--selected .turntable-food-tag__text {

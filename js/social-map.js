@@ -155,6 +155,14 @@
     return html;
   }
 
+  function renderImportHero(analysis) {
+    var yummy = global.Yummi && global.Yummi.yummyCode;
+    if (yummy && typeof yummy.renderImportHero === "function") {
+      return yummy.renderImportHero(analysis, escapeHtml);
+    }
+    return renderPetStage(analysis && analysis.preview);
+  }
+
   function renderFriendResult(analysis) {
     if (!analysis || !analysis.ok) {
       return (
@@ -169,23 +177,11 @@
     return (
       '<div class="map-friend__result-card">' +
         '<section class="map-friend__hero">' +
-          renderPetStage(analysis.preview) +
+          renderImportHero(analysis) +
         '</section>' +
         '<section class="map-friend__score">' +
           '<p class="map-friend__score-num">' + escapeHtml(analysis.selfHasFoods && analysis.similarity != null ? ("口味匹配度 " + analysis.similarity + "%") : "先去点几样食物，再看看你们有多对胃口") + '</p>' +
           '<p class="map-friend__score-text">' + escapeHtml(analysis.similarityLabel || "") + '</p>' +
-          (
-            analysis.personality
-              ? '<p class="map-friend__personality">' +
-                  escapeHtml(analysis.personality.name + " · " + (analysis.personality.oneLiner || analysis.personality.description || "")) +
-                '</p>'
-              : ""
-          ) +
-          (
-            analysis.reasonSummary
-              ? '<p class="map-friend__personality">' + escapeHtml(analysis.reasonSummary) + '</p>'
-              : ""
-          ) +
         '</section>' +
         '<section class="map-friend__section">' +
           '<h3>Ta 喜欢的食物</h3>' +

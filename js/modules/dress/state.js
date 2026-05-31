@@ -7,7 +7,6 @@
   var NONE = "";
   var DEFAULT_PET_NAME = "yummy";
   var DEFAULT_CAT_HOUSE = "cozy-dome";
-  var FREE_ITEM_COUNT = 2;
   var ITEM_PRICE = 2;
 
   var CATEGORY_ORDER = ["头部", "躯干", "四肢", "尾巴", "毯子", "饮品"];
@@ -276,20 +275,9 @@
     return (state.unlocked[category] || []).indexOf(name) !== -1;
   }
 
-  function isDefaultOwned(category, name) {
-    var names = ITEM_NAMES[category] || [];
-    var index = names.indexOf(name);
-    return index > -1 && index < FREE_ITEM_COUNT;
-  }
-
   function isOwned(category, name, state) {
     if (!name) return true;
-    return (
-      currentFor(category, state) === name ||
-      isDefaultOwned(category, name) ||
-      isFoodUnlocked(category, name, state) ||
-      isManuallyUnlocked(category, name, state)
-    );
+    return !!findItem(category, name);
   }
 
   function wardrobeRank(category, name, state, active) {
@@ -302,13 +290,7 @@
     if (isFoodUnlocked(category, name, state)) {
       return 1;
     }
-    if (isManuallyUnlocked(category, name, state)) {
-      return 2;
-    }
-    if (isDefaultOwned(category, name)) {
-      return 3;
-    }
-    return 4;
+    return 2;
   }
 
   function unlockItem(state, category, name) {
@@ -319,10 +301,85 @@
     }
   }
 
-  function setSelection(state, category, name) {
+  var syncLock = false;
+
+  function setSelection(state, category, name, options) {
     state.selected[category] = name || NONE;
     saveStored(state);
+    var synced = sync(state);
+    if (!options || !options.skipFoodSync) {
+      syncFoodFromDressSelection(category, name || NONE);
+    }
+    return synced;
+  }
+
+  function syncDressFromFoodSelection(state) {
+    var names;
+    var lastFood;
+    var lastCategory;
+    var changed = false;
+    var category;
+    var next;
+    var current;
+
+    if (!state || syncLock) {
+      return state;
+    }
+
+    names = getFoodSelectionNames();
+    lastFood = names.length ? names[names.length - 1] : "";
+    lastCategory = findCategoryForFood(lastFood);
+
+    CATEGORY_ORDER.forEach(function (category) {
+      next = category === lastCategory && lastFood ? lastFood : NONE;
+      current = currentFor(category, state);
+
+      if (current !== next) {
+        state.selected[category] = next;
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      saveStored(state);
+    }
+
     return sync(state);
+  }
+
+  function syncFoodFromDressSelection(category, name) {
+    var sel = global.Yummi && global.Yummi.foodSelection;
+
+    if (!sel || syncLock || CATEGORY_ORDER.indexOf(category) === -1 || !name) {
+      return;
+    }
+
+    syncLock = true;
+    try {
+      if (typeof sel.touchLast === "function") {
+        sel.touchLast(name);
+      } else if (typeof sel.record === "function") {
+        sel.record(name);
+      }
+    } finally {
+      syncLock = false;
+    }
+  }
+
+  function handleFoodSelectionChange() {
+    if (!sharedState) {
+      sharedState = createState();
+      return;
+    }
+    syncDressFromFoodSelection(sharedState);
+  }
+
+  function bindFoodSelectionSync() {
+    if (bindFoodSelectionSync.bound || typeof global.addEventListener !== "function") {
+      return;
+    }
+    global.addEventListener("yummi:food-selection-change", handleFoodSelectionChange);
+    bindFoodSelectionSync.bound = true;
   }
 
   function noneLabelFor(category) {
@@ -336,15 +393,15 @@
     var entries = catalogFor(category).map(function (entry, index) {
       var active = current === entry.name;
       var owned = isOwned(category, entry.name, state);
-      var status = active ? "wearing" : (owned ? "owned" : "locked");
+      var status = active ? "wearing" : "owned";
       var rank = wardrobeRank(category, entry.name, state, active);
 
       return Object.assign({}, entry, {
         active: active,
         owned: owned,
-        locked: !owned,
+        locked: false,
         status: status,
-        price: owned ? 0 : ITEM_PRICE,
+        price: 0,
         rank: rank,
         order: index
       });
@@ -593,7 +650,7 @@
 
   function createState() {
     var stored = loadStored();
-    return sync({
+    var state = sync({
       phase: "ready",
       storageKey: STORAGE_KEY,
       categoryOrder: CATEGORY_ORDER.slice(),
@@ -614,35 +671,24 @@
       drink: null,
       wardrobe: []
     });
+
+    syncDressFromFoodSelection(state);
+    return state;
   }
 
-  function applyOrderConfirm(state, options) {
+  function applyOrderConfirm(state) {
     var target;
-    var primaryFood;
-    var category;
-    var applied;
 
     if (!sharedState) {
       sharedState = createState();
     }
 
     target = state || sharedState;
-    primaryFood = options && options.primaryFood != null ? String(options.primaryFood).trim() : "";
-    category = findCategoryForFood(primaryFood);
-    applied = false;
-
-    sync(target);
-
-    if (category) {
-      setSelection(target, category, primaryFood);
-      applied = true;
-    }
+    syncDressFromFoodSelection(target);
 
     return {
       ok: true,
-      applied: applied,
-      category: category,
-      name: applied ? primaryFood : "",
+      applied: true,
       state: target
     };
   }
@@ -662,10 +708,10 @@
       var target = state || sharedState;
       if (!target || CATEGORY_ORDER.indexOf(category) === -1) return null;
       if (name && !findItem(category, name)) return sync(target);
-      if (name && !isOwned(category, name, target)) return sync(target);
 
       return setSelection(target, category, name);
     },
+    syncFromFoodSelection: syncDressFromFoodSelection,
     purchaseAndSelect: function (state, category, name) {
       var target = state || sharedState;
       var wallet = global.Yummi && global.Yummi.fishCoins;
@@ -737,4 +783,6 @@
     noneValue: NONE,
     itemPrice: ITEM_PRICE
   };
+
+  bindFoodSelectionSync();
 })(typeof window !== "undefined" ? window : this);

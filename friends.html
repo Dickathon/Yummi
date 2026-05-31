@@ -7,6 +7,7 @@
   <title>好友 - Yummi</title>
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/shop.css">
   <link rel="stylesheet" href="css/friends.css">
 </head>
 <body class="friends-body">
@@ -40,7 +41,10 @@
         <span>返回</span>
       </button>
       <div class="friends-visit__shop" id="friendsVisitShop"></div>
-      <img class="friends-visit__cat" id="friendsVisitCat" src="" alt="">
+      <div class="friends-visit__cat-wrap" id="friendsVisitCatWrap">
+        <img class="friends-visit__cat" id="friendsVisitCat" src="" alt="">
+        <span class="friends-visit__cat-name" id="friendsVisitCatName"></span>
+      </div>
       <!-- 小猫交互面板 -->
       <div class="friends-catbar" id="friendsCatBar" aria-hidden="true">
         <div class="friends-catbar__arrow"></div>
@@ -50,7 +54,55 @@
         </div>
       </div>
       <div class="friends-visit__label" id="friendsVisitLabel"></div>
+      <div class="friends-visit__dock">
+        <button type="button" class="friends-visit__dock-btn friends-visit__dock-btn--primary" id="friendsVisitPref">
+          <span>🔖</span><span>查看偏好</span>
+        </button>
+        <button type="button" class="friends-visit__dock-btn" id="friendsVisitFeed">
+          <span>🐟</span><span>投喂</span>
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- 口味比对弹窗 -->
+  <div class="shop-compare friends-compare" id="friendsComparePanel" aria-hidden="true">
+    <div class="shop-compare__overlay" id="friendsCompareOverlay"></div>
+    <section class="shop-compare__sheet" role="dialog" aria-modal="true" aria-labelledby="friendsCompareTitle">
+      <div class="shop-compare__header">
+        <div>
+          <p class="shop-compare__eyebrow">YUMMY CODE MATCH</p>
+          <h2 class="shop-compare__title" id="friendsCompareTitle">口味比对</h2>
+        </div>
+        <button type="button" class="shop-compare__close" id="friendsCompareClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="shop-compare__body" id="friendsCompareBody"></div>
+    </section>
+  </div>
+
+  <!-- 投喂弹窗 -->
+  <div class="shop-compare friends-feed" id="friendsFeedPanel" aria-hidden="true">
+    <div class="shop-compare__overlay" id="friendsFeedOverlay"></div>
+    <section class="shop-compare__sheet" role="dialog" aria-modal="true" aria-labelledby="friendsFeedTitle">
+      <div class="shop-compare__header">
+        <div>
+          <p class="shop-compare__eyebrow">FEED FRIEND</p>
+          <h2 class="shop-compare__title" id="friendsFeedTitle">投喂好友</h2>
+        </div>
+        <button type="button" class="shop-compare__close" id="friendsFeedClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="shop-compare__body" id="friendsFeedBody"></div>
+    </section>
   </div>
 
   <!-- 私信聊天界面 -->
@@ -77,6 +129,16 @@
     </div>
   </div>
 
+  <script src="js/data/foods.js"></script>
+  <script src="js/data/food-taste-db.js"></script>
+  <script src="js/data/food-taste.js"></script>
+  <script src="js/data/food-personality.js"></script>
+  <script src="js/data/food-selection-codec.js"></script>
+  <script src="js/data/food-selection.js"></script>
+  <script src="js/modules/dress/config.js"></script>
+  <script src="js/modules/dress/state.js"></script>
+  <script src="js/data/npc-dress.js"></script>
+  <script src="js/data/yummy-code.js"></script>
   <script src="js/fish-coins.js"></script>
   <script src="js/friends.js"></script>
 </body>

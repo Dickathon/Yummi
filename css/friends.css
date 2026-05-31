@@ -14,6 +14,8 @@
 }
 
 .friends-page {
+  position: relative;
+  z-index: 1;
   max-width: var(--layout-max-width);
   margin: 0 auto;
   padding: var(--safe-top) 16px calc(24px + var(--safe-bottom));
@@ -281,7 +283,13 @@
   pointer-events: none;
 }
 
+.friends-msg[aria-hidden="true"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .friends-msg[aria-hidden="false"] {
+  visibility: visible;
   pointer-events: auto;
 }
 
@@ -523,16 +531,24 @@
   pointer-events: none;
 }
 
+.friends-visit[aria-hidden="true"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .friends-visit[aria-hidden="false"] {
+  visibility: visible;
   pointer-events: auto;
 }
 
 .friends-visit__overlay {
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: var(--color-bg);
   opacity: 0;
   transition: opacity 0.35s;
+  pointer-events: none;
 }
 
 .friends-visit[aria-hidden="false"] .friends-visit__overlay {
@@ -542,6 +558,7 @@
 .friends-visit__stage {
   position: absolute;
   inset: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -549,11 +566,13 @@
   opacity: 0;
   transform: scale(0.96);
   transition: opacity 0.4s 0.1s, transform 0.4s 0.1s var(--ease-standard);
+  pointer-events: none;
 }
 
 .friends-visit[aria-hidden="false"] .friends-visit__stage {
   opacity: 1;
   transform: scale(1);
+  pointer-events: auto;
 }
 
 .friends-visit__back {
@@ -579,12 +598,16 @@
 }
 
 .friends-visit__shop {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .friends-visit__shop svg,
@@ -595,16 +618,43 @@
   display: block;
 }
 
-.friends-visit__cat {
+.friends-visit__cat-wrap {
   position: absolute;
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   cursor: pointer;
+}
+
+.friends-visit__cat {
+  display: block;
+  width: 100%;
+  height: auto;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  pointer-events: none;
+}
+
+.friends-visit__cat-name {
+  max-width: 11em;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  letter-spacing: var(--letter-caption);
+  color: var(--color-primary);
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-rest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 .friends-visit__label {
   position: absolute;
-  bottom: calc(24px + var(--safe-bottom));
+  bottom: calc(88px + var(--safe-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
@@ -616,6 +666,67 @@
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-rest);
   white-space: nowrap;
+}
+
+.friends-visit__dock {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + var(--safe-bottom));
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.friends-visit__dock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  font-weight: var(--font-weight-body);
+  letter-spacing: var(--letter-caption);
+  color: var(--color-primary);
+  background: rgba(245, 240, 232, 0.94);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-rest);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.friends-visit__dock-btn:active {
+  transform: scale(0.97);
+}
+
+.friends-visit__dock-btn--primary {
+  color: var(--color-bg);
+  background: var(--color-primary);
+}
+
+.friends-compare.shop-compare,
+.friends-feed.shop-compare {
+  z-index: 300;
+}
+
+.friends-compare.shop-compare[aria-hidden="true"],
+.friends-feed.shop-compare[aria-hidden="true"] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.friends-compare.shop-compare[aria-hidden="false"],
+.friends-feed.shop-compare[aria-hidden="false"] {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.friends-feed .shop-compare__body {
+  padding-top: 2px;
 }
 
 /* 小猫交互面板 */

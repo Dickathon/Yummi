@@ -84,15 +84,9 @@
   }
 
   function replayActiveTabGuides() {
-    var modules = global.Yummi && global.Yummi.modules;
-    var tab = global.Yummi && global.Yummi.app && global.Yummi.app.getActiveTab();
-
-    if (tab === "order" && modules && modules.order && modules.order.guide) {
-      modules.order.guide.replayAll();
-      return;
-    }
-    if (tab === "dress" && modules && modules.dress && modules.dress.guide) {
-      modules.dress.guide.replayAll();
+    var guides = global.Yummi && global.Yummi.guides;
+    if (guides && typeof guides.refreshAll === "function") {
+      guides.refreshAll();
     }
   }
 

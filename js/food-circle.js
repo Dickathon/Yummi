@@ -554,8 +554,6 @@
 
   function renderSimilaritySection(analysis) {
     var scoreText;
-    var personality = analysis.personality;
-    var reason = analysis.reasonSummary || "";
 
     if (analysis.selfHasFoods && analysis.similarity != null) {
       scoreText = "口味匹配度 " + analysis.similarity + "%";
@@ -567,20 +565,16 @@
       '<section class="fc-share-preview__score">' +
         '<p class="fc-share-preview__score-num">' + escapeHtml(scoreText) + "</p>" +
         '<p class="fc-share-preview__score-text">' + escapeHtml(analysis.similarityLabel || "") + "</p>" +
-        (
-          personality
-            ? '<p class="fc-share-preview__personality">' +
-                escapeHtml(personality.name + " · " + (personality.oneLiner || personality.description || "")) +
-              "</p>"
-            : ""
-        ) +
-        (
-          reason
-            ? '<p class="fc-share-preview__personality">' + escapeHtml(reason) + "</p>"
-            : ""
-        ) +
       "</section>"
     );
+  }
+
+  function renderImportHero(analysis) {
+    var yummy = global.Yummi && global.Yummi.yummyCode;
+    if (yummy && typeof yummy.renderImportHero === "function") {
+      return yummy.renderImportHero(analysis, escapeHtml);
+    }
+    return renderSharedPetStage(analysis && analysis.preview);
   }
 
   function renderEmptyHint(text) {
@@ -593,7 +587,7 @@
     var theirFoods = analysis.theirFoods || [];
 
     return (
-      renderSharedPetStage(analysis.preview) +
+      renderImportHero(analysis) +
       renderSimilaritySection(analysis) +
       '<section class="fc-share-preview__section">' +
         "<h3>Ta 喜欢的食物</h3>" +

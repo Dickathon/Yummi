@@ -169,6 +169,9 @@
       }
 
       image = new Image();
+      if (global.location && global.location.protocol !== "file:" && src.indexOf("data:") !== 0) {
+        image.crossOrigin = "anonymous";
+      }
       image.onload = function () {
         resolve(image);
       };
@@ -511,13 +514,17 @@
           filename: filename
         };
       }).catch(function () {
-        return {
-          url: canvas.toDataURL("image/png"),
-          objectUrl: "",
-          dataUrl: canvas.toDataURL("image/png"),
-          blob: null,
-          filename: filename
-        };
+        try {
+          return {
+            url: canvas.toDataURL("image/png"),
+            objectUrl: "",
+            dataUrl: canvas.toDataURL("image/png"),
+            blob: null,
+            filename: filename
+          };
+        } catch (fallbackError) {
+          return Promise.reject(new Error("canvas_export_tainted"));
+        }
       });
     }
 

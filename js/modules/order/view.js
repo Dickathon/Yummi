@@ -1193,6 +1193,13 @@ function renderCapSideImageBands(disc, geometry) {
         updateSelectionPanel();
       }
 
+      function handleExternalFoodSelectionChange() {
+        if (!runtime || runtime.state.confirmed) {
+          return;
+        }
+        refreshSelectionUi();
+      }
+
       function renderSelectionStrip(names) {
         var html = [];
         var i;
@@ -1331,13 +1338,26 @@ function renderCapSideImageBands(disc, geometry) {
       function handlePlacardSelect(slotNode) {
         var foodName = slotNode.getAttribute("data-food-name");
         var sel = global.Yummi && global.Yummi.foodSelection;
+        var names;
         var result;
 
         if (!foodName || !sel || (runtime && runtime.state && runtime.state.confirmed)) {
           return;
         }
 
-        result = sel.toggle(foodName);
+        if (sel.has(foodName)) {
+          names = sel.getNames();
+          if (names.length && names[names.length - 1] === foodName) {
+            result = sel.remove(foodName);
+          } else if (typeof sel.touchLast === "function") {
+            result = sel.touchLast(foodName);
+          } else {
+            result = sel.toggle(foodName);
+          }
+        } else {
+          result = sel.record(foodName);
+        }
+
         if (!result.ok) {
           return;
         }
@@ -1873,6 +1893,11 @@ function renderCapSideImageBands(disc, geometry) {
     if (confirmClose) {
       unbinds.push(util.on(confirmClose, "click", closeConfirmModal));
     }
+
+    unbinds.push(function () {
+      global.removeEventListener("yummi:food-selection-change", handleExternalFoodSelectionChange);
+    });
+    global.addEventListener("yummi:food-selection-change", handleExternalFoodSelectionChange);
 
     startAnimation();
 

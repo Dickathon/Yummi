@@ -36,6 +36,7 @@
   padding: 16px 0 20px;
   background: linear-gradient(180deg, var(--color-bg) 70%, transparent 100%);
   backdrop-filter: blur(6px);
+  text-align: center;
 }
 
 /* 右上角操作按钮组 */
@@ -89,12 +90,13 @@
 }
 
 .map-title {
-  margin-top: 14px;
+  margin: 60px 0 0;
   font-size: 1.5rem;
   font-weight: var(--font-weight-title);
   letter-spacing: var(--letter-title);
   color: var(--color-primary);
   line-height: var(--line-title);
+  text-align: center;
 }
 
 .map-subtitle {
@@ -103,6 +105,7 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
   letter-spacing: var(--letter-caption);
+  text-align: center;
 }
 
 /* 街道主区域 */
@@ -661,6 +664,11 @@
 .map-friend__hero {
   display: grid;
   justify-items: center;
+  width: 100%;
+}
+
+.map-friend__hero .shop-compare__hero {
+  width: 100%;
 }
 
 .map-friend__stage {

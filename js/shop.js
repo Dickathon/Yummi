@@ -170,6 +170,7 @@
 
   function init() {
     var index = getShopIndex();
+    currentShopIndex = index;
     if (index === -1) {
       document.body.innerHTML =
         '<div class="shop-error">' +
@@ -205,9 +206,10 @@
           '<div class="shop-cat" style="left:' + escapeHtml(c.left) +
           ';top:' + escapeHtml(c.top) + ';" data-visitor-index="' + i + '">' +
             '<img class="shop-cat__img" src="' + escapeHtml(c.img) +
-            '" alt="' + escapeHtml(c.alt || "小猫") +
+            '" alt="' + escapeHtml(visitor.name) +
             '" width="' + escapeHtml(c.width) +
             '" style="width:' + escapeHtml(c.width) + ';">' +
+            '<span class="shop-cat__name">' + escapeHtml(visitor.name) + "的哈基米</span>" +
           '</div>';
       }
       catsContainer.innerHTML = html;
@@ -381,7 +383,19 @@
   var compareBody = document.getElementById("shopCompareBody");
   var currentMode = "visitor"; // "visitor" | "feed" | "pet" | "message" | "compare"
   var currentCat = null;
+  var currentShopIndex = -1;
   var foodImageIndex = null;
+
+  function getVisitorDressSelection(visitor, visitorIndex) {
+    var npcDress = global.Yummi && global.Yummi.npcDress;
+    if (npcDress && typeof npcDress.resolveForVisitor === "function") {
+      return npcDress.resolveForVisitor(currentShopIndex, visitor, visitorIndex);
+    }
+    if (visitor && visitor.dress && visitor.dress.selected) {
+      return visitor.dress.selected;
+    }
+    return {};
+  }
 
   function closePopup() {
     if (popup) popup.setAttribute("aria-hidden", "true");
@@ -564,13 +578,14 @@
       "</section>";
   }
 
-  function openComparePanel(visitor) {
+  function openComparePanel(visitor, visitorIndex) {
     var taste = global.Yummi && global.Yummi.foodTaste;
     var yummy = global.Yummi && global.Yummi.yummyCode;
     var ranked;
     var theirFoods = [];
     var payload;
     var analysis;
+    var dressSelected;
     var i;
 
     if (!comparePanel || !compareBody) {
@@ -608,11 +623,13 @@
       return;
     }
 
+    dressSelected = getVisitorDressSelection(visitor, visitorIndex);
+
     payload = {
       petName: visitor.name,
       foods: theirFoods,
       dress: {
-        selected: {}
+        selected: dressSelected
       }
     };
 
@@ -711,7 +728,7 @@
     popup.style.top = top + "px";
   }
 
-  function renderVisitorPopup(visitor) {
+  function renderVisitorPopup(visitor, visitorIndex) {
     if (!popupBody) return;
     currentMode = "visitor";
     popupBody.innerHTML =
@@ -742,7 +759,7 @@
     if (prefBtn) {
       prefBtn.addEventListener("click", function (e) {
         e.stopPropagation();
-        openComparePanel(visitor);
+        openComparePanel(visitor, visitorIndex);
       });
     }
 
@@ -1002,7 +1019,7 @@
       }
 
       currentCat = cat;
-      renderVisitorPopup(visitors[idx]);
+      renderVisitorPopup(visitors[idx], idx);
       // 用 setTimeout 确保 DOM 渲染后再定位
       setTimeout(function () {
         positionPopup(cat);

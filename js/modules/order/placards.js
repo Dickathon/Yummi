@@ -478,6 +478,17 @@
     return discId + "-" + slotIndex;
   }
 
+  function getSectorColor(disc, slotIndex) {
+    var colors = disc && disc.sectorColors;
+    var idx = Number(slotIndex);
+
+    if (!colors || !colors.length || isNaN(idx)) {
+      return "#c4a882";
+    }
+
+    return colors[((idx % colors.length) + colors.length) % colors.length];
+  }
+
   function getSectorRadii(geometry) {
     return {
       outer: geometry.rx - 6,
@@ -638,7 +649,28 @@
     slotNode = getSlotNodeFromImage(imageEl);
     if (slotNode) {
       layoutFoodLabel(slotNode, imageEl);
+      layoutSlotSelectionFrame(slotNode, size.w, size.h);
     }
+  }
+
+  function layoutSlotSelectionFrame(slotNode, imageW, imageH) {
+    var frameEl;
+    var pad;
+
+    if (!slotNode || !imageW || !imageH) {
+      return;
+    }
+
+    frameEl = slotNode.querySelector("[data-placard-frame]");
+    if (!frameEl) {
+      return;
+    }
+
+    pad = 3;
+    frameEl.setAttribute("x", formatNumber(-imageW / 2 - pad));
+    frameEl.setAttribute("y", formatNumber(-imageH - pad));
+    frameEl.setAttribute("width", formatNumber(imageW + pad * 2));
+    frameEl.setAttribute("height", formatNumber(imageH + pad * 2));
   }
 
   function getSlotImageEl(disc, slot, slotNode) {
@@ -805,11 +837,13 @@
     var hitR = Math.max(14, Math.round(maxDim * 0.52));
     var hitCy = Math.round(drop - maxDim * 0.12);
     var foodName = getFoodNameFromUrl(src);
+    var sectorColor = getSectorColor(disc, slot.index);
 
     return (
       '<g class="turntable-slot" data-placard-slot="' + slotKey + '"' +
         ' data-slot-index="' + slot.index + '"' +
         ' data-disc-id="' + disc.id + '"' +
+        ' style="--sector-color:' + sectorColor + '"' +
         ' data-food-name="' + escapeAttr(foodName) + '"' +
         ' data-slot-center-angle="' + formatNumber(slot.centerAngle) + '"' +
         ' data-slot-x="' + formatNumber(center.x) + '"' +
@@ -826,6 +860,9 @@
                 ' data-max-dim="' + formatNumber(maxDim) + '"' +
                 ' href="' + escapeAttr(src) + '"' +
                 ' opacity="0"></image>' +
+              '<rect class="turntable-slot-frame" data-placard-frame="' + slotKey + '"' +
+                ' x="0" y="0" width="1" height="1" rx="8" ry="8"' +
+                ' fill="none" vector-effect="non-scaling-stroke"></rect>' +
               '<circle class="turntable-placard-hit" data-placard-hit="' + slotKey + '"' +
                 ' cx="0" cy="' + formatNumber(hitCy) + '" r="' + formatNumber(hitR) + '"></circle>' +
               '<g class="turntable-food-tag turntable-food-tag--' + disc.id + '" data-placard-label="' + slotKey + '">' +

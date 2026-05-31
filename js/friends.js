@@ -14,7 +14,8 @@
       bio: "你的专属饭搭子",
       affinity: 96,
       lastInteract: "昨天",
-      visits: 32
+      visits: 32,
+      preference: { sweet: 60, salty: 50, sour: 25, spicy: 35, bitter: 20, umami: 65, oily: 40, fresh: 55 }
     },
     {
       id: "f2",
@@ -23,7 +24,8 @@
       bio: "一起吃遍所有奶茶店吧",
       affinity: 88,
       lastInteract: "2天前",
-      visits: 24
+      visits: 24,
+      preference: { sweet: 75, salty: 15, sour: 20, spicy: 0, bitter: 10, umami: 30, oily: 20, fresh: 55 }
     },
     {
       id: "f3",
@@ -32,7 +34,8 @@
       bio: "今天也在星巴克晒太阳 ~",
       affinity: 78,
       lastInteract: "10分钟前",
-      visits: 12
+      visits: 12,
+      preference: { sweet: 55, salty: 20, sour: 15, spicy: 5, bitter: 35, umami: 30, oily: 25, fresh: 40 }
     },
     {
       id: "f4",
@@ -41,7 +44,8 @@
       bio: "喜茶的奶盖yyds",
       affinity: 65,
       lastInteract: "1小时前",
-      visits: 8
+      visits: 8,
+      preference: { sweet: 80, salty: 15, sour: 10, spicy: 0, bitter: 5, umami: 25, oily: 20, fresh: 45 }
     },
     {
       id: "f5",
@@ -50,7 +54,8 @@
       bio: "正在寻找全城最好吃的汉堡",
       affinity: 42,
       lastInteract: "3小时前",
-      visits: 5
+      visits: 5,
+      preference: { sweet: 30, salty: 65, sour: 20, spicy: 40, bitter: 10, umami: 70, oily: 60, fresh: 25 }
     },
     {
       id: "f6",
@@ -59,7 +64,8 @@
       bio: "喜欢一切抹茶味的东西",
       affinity: 35,
       lastInteract: "昨天",
-      visits: 3
+      visits: 3,
+      preference: { sweet: 40, salty: 20, sour: 15, spicy: 0, bitter: 55, umami: 30, oily: 20, fresh: 50 }
     },
     {
       id: "f7",
@@ -68,7 +74,8 @@
       bio: "肯德基常驻嘉宾",
       affinity: 28,
       lastInteract: "3天前",
-      visits: 2
+      visits: 2,
+      preference: { sweet: 20, salty: 65, sour: 15, spicy: 45, bitter: 10, umami: 70, oily: 60, fresh: 20 }
     },
     {
       id: "f8",
@@ -77,7 +84,8 @@
       bio: "奶茶三分糖，生活十分甜",
       affinity: 15,
       lastInteract: "5天前",
-      visits: 1
+      visits: 1,
+      preference: { sweet: 75, salty: 15, sour: 10, spicy: 0, bitter: 5, umami: 30, oily: 20, fresh: 40 }
     },
     {
       id: "f9",
@@ -86,13 +94,56 @@
       bio: "海底捞夜场选手",
       affinity: 8,
       lastInteract: "1周前",
-      visits: 1
+      visits: 1,
+      preference: { sweet: 25, salty: 55, sour: 20, spicy: 80, bitter: 15, umami: 75, oily: 60, fresh: 35 }
     }
   ];
 
   var currentMsgId = null;
   var currentVisitId = null;
-  var CATBAR_OFFSET_Y = 52; // 面板在小猫上方的像素偏移
+  var lastListFocus = null;
+  var CATBAR_OFFSET_Y = 52;
+  var foodImageIndex = null;
+
+  function containsNode(parent, node) {
+    return !!(parent && node && node.nodeType === 1 && (parent === node || parent.contains(node)));
+  }
+
+  function blurFocusWithin(container) {
+    var active = document.activeElement;
+    if (containsNode(container, active) && active && typeof active.blur === "function") {
+      active.blur();
+    }
+  }
+
+  function hidePanel(panel, restoreFocusEl) {
+    if (!panel) {
+      return;
+    }
+
+    blurFocusWithin(panel);
+    panel.setAttribute("aria-hidden", "true");
+
+    if (restoreFocusEl && typeof restoreFocusEl.focus === "function") {
+      try {
+        restoreFocusEl.focus({ preventScroll: true });
+      } catch (e) {
+        restoreFocusEl.focus();
+      }
+    }
+  }
+
+  function visitRestoreFocus() {
+    var visitOpen = document.getElementById("friendsVisit");
+    if (visitOpen && visitOpen.getAttribute("aria-hidden") === "false") {
+      var prefBtn = document.getElementById("friendsVisitPref");
+      if (prefBtn) {
+        return prefBtn;
+      }
+      return document.getElementById("friendsVisitBack");
+    }
+    return lastListFocus;
+  }
 
   /* 虚拟聊天记录 — 每个好友预置几条消息 */
   var CHAT_HISTORY = {
@@ -283,10 +334,8 @@
 
   function closeMsgPanel() {
     var panel = document.getElementById("friendsMsg");
-    if (panel) {
-      panel.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
+    hidePanel(panel, lastListFocus);
+    document.body.style.overflow = "";
     currentMsgId = null;
   }
 
@@ -338,6 +387,480 @@
     });
   }
 
+  function getCurrentFriend() {
+    return FRIENDS.find(function (f) { return f.id === currentVisitId; }) || null;
+  }
+
+  function getFriendDressSelection(friend) {
+    var npcDress = global.Yummi && global.Yummi.npcDress;
+    if (npcDress && typeof npcDress.resolveForFriend === "function") {
+      return npcDress.resolveForFriend(friend);
+    }
+    if (friend && friend.dress && friend.dress.selected) {
+      return friend.dress.selected;
+    }
+    return {};
+  }
+
+  function getSelectedFoods() {
+    var selection = global.Yummi && global.Yummi.foodSelection;
+    var names;
+
+    if (selection && typeof selection.getNames === "function") {
+      names = selection.getNames();
+      if (Array.isArray(names)) {
+        return names;
+      }
+    }
+
+    try {
+      var raw = localStorage.getItem("yummi_food_selection");
+      if (!raw) return [];
+      var list = JSON.parse(raw);
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function buildFoodImageIndex() {
+    var foods = global.Yummi && global.Yummi.foods;
+    var categories = foods && foods.categories ? foods.categories : {};
+    var typeToFolder = {
+      "主食": "food1",
+      "甜品": "food2",
+      "饮品": "food3"
+    };
+    var type;
+    var list;
+    var i;
+    var folder;
+
+    if (foodImageIndex) {
+      return foodImageIndex;
+    }
+
+    foodImageIndex = {};
+    for (type in categories) {
+      if (!Object.prototype.hasOwnProperty.call(categories, type)) {
+        continue;
+      }
+      folder = typeToFolder[type];
+      if (!folder) {
+        continue;
+      }
+      list = categories[type] || [];
+      for (i = 0; i < list.length; i += 1) {
+        foodImageIndex[list[i]] = "source/compressed/10kb/" + folder + "/" + list[i] + "-10kb.webp";
+      }
+    }
+    return foodImageIndex;
+  }
+
+  function getFoodImageUrl(name) {
+    var index = buildFoodImageIndex();
+    return index[name] || "";
+  }
+
+  function renderFoodCards(names) {
+    if (!names || !names.length) {
+      return "";
+    }
+
+    return (
+      '<div class="shop-compare__food-grid">' +
+        names.map(function (name) {
+          var src = getFoodImageUrl(name);
+          return (
+            '<article class="shop-compare__food-card">' +
+              '<div class="shop-compare__food-media">' +
+                (
+                  src
+                    ? '<img class="shop-compare__food-thumb" src="' + escapeHtml(src) + '" alt="' + escapeHtml(name) + '" loading="lazy" decoding="async">'
+                    : '<span class="shop-compare__food-placeholder" aria-hidden="true">🍽</span>'
+                ) +
+              '</div>' +
+              '<p class="shop-compare__food-name">' + escapeHtml(name) + "</p>" +
+            "</article>"
+          );
+        }).join("") +
+      "</div>"
+    );
+  }
+
+  function renderCompareEmpty(text) {
+    return '<p class="shop-compare__empty">' + escapeHtml(text) + "</p>";
+  }
+
+  function renderCompareHero(analysis) {
+    var preview = analysis && analysis.preview ? analysis.preview : null;
+    var layers = preview && preview.layers ? preview.layers : [];
+    var drink = preview && preview.drink ? preview.drink : null;
+    var personality = analysis && analysis.personality ? analysis.personality : null;
+    var petName = preview && preview.petDisplayName ? preview.petDisplayName : "Ta 的哈基米";
+    var stageHtml = "";
+    var i;
+
+    stageHtml += '<div class="shop-compare__stage">';
+    stageHtml += '<div class="shop-compare__aura" aria-hidden="true"></div>';
+
+    if (layers.length) {
+      for (i = 0; i < layers.length; i += 1) {
+        stageHtml +=
+          '<img class="shop-compare__layer" src="' + escapeHtml(layers[i].src) + '"' +
+            ' alt="' + escapeHtml(layers[i].label || "哈基米图层") + '"' +
+            ' loading="lazy" decoding="async">';
+      }
+    } else {
+      stageHtml += '<div class="shop-compare__fallback" aria-hidden="true">🐾</div>';
+    }
+
+    if (drink && drink.src) {
+      stageHtml +=
+        '<div class="shop-compare__drink">' +
+          '<img src="' + escapeHtml(drink.src) + '" alt="' + escapeHtml(drink.name || "饮品") + '" loading="lazy" decoding="async">' +
+          '<span>' + escapeHtml(drink.name || "") + "</span>" +
+        "</div>";
+    }
+
+    stageHtml += "</div>";
+
+    return (
+      '<section class="shop-compare__hero">' +
+        stageHtml +
+        '<div class="shop-compare__persona">' +
+          '<p class="shop-compare__persona-kicker">宠物形象</p>' +
+          '<h3 class="shop-compare__pet-name">' + escapeHtml(petName) + "</h3>" +
+          (
+            personality
+              ? '<div class="shop-compare__mbti">' +
+                  '<span class="shop-compare__mbti-tag">MBTI</span>' +
+                  '<strong class="shop-compare__mbti-name">' + escapeHtml(personality.code || personality.name || "未知人格") + "</strong>" +
+                  '<p class="shop-compare__mbti-line">' + escapeHtml((personality.name || "") + (personality.oneLiner ? " · " + personality.oneLiner : "")) + "</p>" +
+                "</div>"
+              : '<p class="shop-compare__mbti-line">这只猫还没有可读的人格标签。</p>'
+          ) +
+          (
+            analysis && analysis.reasonSummary
+              ? '<p class="shop-compare__reason">' + escapeHtml(analysis.reasonSummary) + "</p>"
+              : ""
+          ) +
+        "</div>" +
+      "</section>"
+    );
+  }
+
+  function renderCompareScore(analysis) {
+    var scoreText;
+
+    if (analysis && analysis.selfHasFoods && analysis.similarity != null) {
+      scoreText = "口味匹配度 " + analysis.similarity + "%";
+    } else {
+      scoreText = "先去点几样食物，再看看你们有多对胃口";
+    }
+
+    return (
+      '<section class="shop-compare__score">' +
+        '<p class="shop-compare__score-num">' + escapeHtml(scoreText) + "</p>" +
+        '<p class="shop-compare__score-text">' + escapeHtml((analysis && analysis.similarityLabel) || "") + "</p>" +
+      "</section>"
+    );
+  }
+
+  function renderCompareBody(analysis) {
+    var compareBody = document.getElementById("friendsCompareBody");
+    var commonFoods = analysis && analysis.commonFoods ? analysis.commonFoods : [];
+    var possibleFoods = analysis && analysis.possibleFoods ? analysis.possibleFoods : [];
+
+    if (!compareBody) {
+      return;
+    }
+
+    compareBody.innerHTML =
+      renderCompareHero(analysis) +
+      renderCompareScore(analysis) +
+      '<section class="shop-compare__section">' +
+        '<h3 class="shop-compare__section-title">共同喜欢</h3>' +
+        (
+          commonFoods.length
+            ? renderFoodCards(commonFoods)
+            : renderCompareEmpty("你们还没点到同一道，但口味方向很接近。")
+        ) +
+      "</section>" +
+      '<section class="shop-compare__section">' +
+        '<h3 class="shop-compare__section-title">可能喜欢</h3>' +
+        (
+          possibleFoods.length
+            ? renderFoodCards(possibleFoods)
+            : renderCompareEmpty("等你们再多选几样食物，系统会给出更准的推荐。")
+        ) +
+      "</section>";
+  }
+
+  function openComparePanel() {
+    var friend = getCurrentFriend();
+    var taste = global.Yummi && global.Yummi.foodTaste;
+    var yummy = global.Yummi && global.Yummi.yummyCode;
+    var comparePanel = document.getElementById("friendsComparePanel");
+    var compareBody = document.getElementById("friendsCompareBody");
+    var ranked;
+    var theirFoods = [];
+    var payload;
+    var analysis;
+    var i;
+
+    if (!friend || !comparePanel || !compareBody) {
+      return;
+    }
+
+    if (!taste || typeof taste.rankByProfile !== "function") {
+      compareBody.innerHTML =
+        '<section class="shop-compare__error">' +
+          '<h3 class="shop-compare__section-title">暂时无法比对</h3>' +
+          '<p class="shop-compare__empty">口味数据还没准备好，请稍后再试。</p>' +
+        "</section>";
+      comparePanel.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      return;
+    }
+
+    ranked = taste.rankByProfile(friend.preference || {}, { limit: 6 }) || [];
+    for (i = 0; i < ranked.length; i += 1) {
+      if (ranked[i] && ranked[i].name) {
+        theirFoods.push(ranked[i].name);
+      }
+    }
+
+    if (!theirFoods.length || !yummy || typeof yummy.analyzeSharedTaste !== "function") {
+      compareBody.innerHTML =
+        '<section class="shop-compare__error">' +
+          '<h3 class="shop-compare__section-title">暂时无法比对</h3>' +
+          '<p class="shop-compare__empty">YUMMY 码比对模块还没准备好，请稍后再试。</p>' +
+        "</section>";
+      comparePanel.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      return;
+    }
+
+    payload = {
+      petName: friend.name,
+      foods: theirFoods,
+      dress: {
+        selected: getFriendDressSelection(friend)
+      }
+    };
+
+    analysis = yummy.analyzeSharedTaste(getSelectedFoods(), payload);
+    if (!analysis || !analysis.ok) {
+      compareBody.innerHTML =
+        '<section class="shop-compare__error">' +
+          '<h3 class="shop-compare__section-title">暂时无法比对</h3>' +
+          '<p class="shop-compare__empty">这只猫的偏好还没法转换成对比结果。</p>' +
+        "</section>";
+      comparePanel.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      return;
+    }
+
+    renderCompareBody(analysis);
+    comparePanel.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeComparePanel() {
+    var comparePanel = document.getElementById("friendsComparePanel");
+    hidePanel(comparePanel, visitRestoreFocus());
+    if (document.getElementById("friendsVisit") &&
+        document.getElementById("friendsVisit").getAttribute("aria-hidden") === "false") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }
+
+  function setupComparePanel() {
+    var comparePanel = document.getElementById("friendsComparePanel");
+    var compareOverlay = document.getElementById("friendsCompareOverlay");
+    var compareClose = document.getElementById("friendsCompareClose");
+
+    if (compareOverlay) {
+      compareOverlay.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeComparePanel();
+      });
+    }
+
+    if (compareClose) {
+      compareClose.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeComparePanel();
+      });
+    }
+
+    if (comparePanel) {
+      comparePanel.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && comparePanel && comparePanel.getAttribute("aria-hidden") === "false") {
+        closeComparePanel();
+      }
+    });
+  }
+
+  function renderFeedBody(mode, friend, foodName) {
+    var feedBody = document.getElementById("friendsFeedBody");
+    var foods = getSelectedFoods();
+    var coins = global.Yummi && global.Yummi.fishCoins ? global.Yummi.fishCoins.get() : 0;
+    var html = "";
+    var i;
+
+    if (!feedBody || !friend) {
+      return;
+    }
+
+    if (mode === "result") {
+      feedBody.innerHTML =
+        '<div class="shop-feed__crunch">' +
+          '<div class="shop-feed__crunch-text">咔哧 ~ 咔哧 ~</div>' +
+          '<div class="shop-feed__sub">' + escapeHtml(friend.name) + "吃掉了你投喂的「" + escapeHtml(foodName) + "」，尾巴摇个不停</div>" +
+        '</div>' +
+        '<button type="button" class="shop-feed__back" id="friendsFeedBack">完成</button>';
+      return;
+    }
+
+    if (mode === "nocoin") {
+      feedBody.innerHTML =
+        '<div class="shop-feed__empty">' +
+          '<div class="shop-feed__empty-icon">🐟</div>' +
+          '<div class="shop-feed__empty-text">小鱼干币不足</div>' +
+          '<div class="shop-feed__empty-sub">投喂需要 1 个小鱼干币，去多逛逛赚一些吧 ~</div>' +
+        '</div>' +
+        '<button type="button" class="shop-feed__back" id="friendsFeedBack">返回</button>';
+      return;
+    }
+
+    if (!foods.length) {
+      feedBody.innerHTML =
+        '<div class="shop-feed__empty">' +
+          '<div class="shop-feed__empty-icon">🍽</div>' +
+          '<div class="shop-feed__empty-text">还没有选好的食物</div>' +
+          '<div class="shop-feed__empty-sub">去点餐模块选些好吃的再来投喂吧 ~</div>' +
+        '</div>' +
+        '<button type="button" class="shop-feed__back" id="friendsFeedBack">返回</button>';
+      return;
+    }
+
+    html = '<div class="shop-feed__title">选一种食物投喂 ' + escapeHtml(friend.name) + "</div>";
+    html += '<div class="shop-feed__coin">🐟 小鱼干币：' + coins + "</div>";
+    html += '<div class="shop-feed__list">';
+    for (i = 0; i < foods.length; i += 1) {
+      html +=
+        '<button type="button" class="shop-feed__item" data-food-index="' + i + '">' +
+          '<span class="shop-feed__item-media">' +
+            (
+              getFoodImageUrl(foods[i])
+                ? '<img class="shop-feed__item-thumb" src="' + escapeHtml(getFoodImageUrl(foods[i])) + '" alt="' + escapeHtml(foods[i]) + '" loading="lazy" decoding="async">'
+                : '<span class="shop-feed__item-placeholder" aria-hidden="true">🍽</span>'
+            ) +
+          "</span>" +
+          '<span class="shop-feed__item-content">' +
+            '<span class="shop-feed__item-name">' + escapeHtml(foods[i]) + "</span>" +
+          "</span>" +
+        "</button>";
+    }
+    html += "</div>";
+    html += '<button type="button" class="shop-feed__back" id="friendsFeedBack">返回</button>';
+    feedBody.innerHTML = html;
+
+    feedBody.querySelectorAll(".shop-feed__item").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var idx = parseInt(btn.getAttribute("data-food-index"), 10);
+        var selectedFood = foods[idx];
+        if (!global.Yummi || !global.Yummi.fishCoins || !global.Yummi.fishCoins.spend(1)) {
+          renderFeedBody("nocoin", friend);
+          bindFeedBodyActions(friend);
+          return;
+        }
+        global.Yummi.fishCoins.render("fishCoinBar");
+        addAffinity(5);
+        renderList();
+        renderFeedBody("result", friend, selectedFood);
+        bindFeedBodyActions(friend);
+      });
+    });
+  }
+
+  function bindFeedBodyActions(friend) {
+    var backBtn = document.getElementById("friendsFeedBack");
+    if (backBtn) {
+      backBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeFeedPanel();
+      });
+    }
+  }
+
+  function openFeedPanel() {
+    var friend = getCurrentFriend();
+    var feedPanel = document.getElementById("friendsFeedPanel");
+
+    if (!friend || !feedPanel) {
+      return;
+    }
+
+    renderFeedBody("list", friend);
+    bindFeedBodyActions(friend);
+    feedPanel.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeFeedPanel() {
+    var feedPanel = document.getElementById("friendsFeedPanel");
+    hidePanel(feedPanel, visitRestoreFocus());
+    if (document.getElementById("friendsVisit") &&
+        document.getElementById("friendsVisit").getAttribute("aria-hidden") === "false") {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+  }
+
+  function setupFeedPanel() {
+    var feedPanel = document.getElementById("friendsFeedPanel");
+    var feedOverlay = document.getElementById("friendsFeedOverlay");
+    var feedClose = document.getElementById("friendsFeedClose");
+
+    if (feedOverlay) {
+      feedOverlay.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeFeedPanel();
+      });
+    }
+
+    if (feedClose) {
+      feedClose.addEventListener("click", function (e) {
+        e.stopPropagation();
+        closeFeedPanel();
+      });
+    }
+
+    if (feedPanel) {
+      feedPanel.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && feedPanel && feedPanel.getAttribute("aria-hidden") === "false") {
+        closeFeedPanel();
+      }
+    });
+  }
+
   /* ========== 拜访视图 ========== */
 
   function openVisitView(friendId) {
@@ -353,20 +876,27 @@
 
     var view = document.getElementById("friendsVisit");
     var shopHost = document.getElementById("friendsVisitShop");
+    var catWrap = document.getElementById("friendsVisitCatWrap");
     var catImg = document.getElementById("friendsVisitCat");
+    var catName = document.getElementById("friendsVisitCatName");
     var label = document.getElementById("friendsVisitLabel");
 
     if (shopHost) {
       shopHost.innerHTML = '<img src="' + escapeHtml(shop.svg) + '" alt="' + escapeHtml(shop.name) + '">';
     }
 
-    if (catImg) {
+    if (catWrap && catImg) {
+      catWrap.style.left = shop.catPos.left + "%";
+      catWrap.style.top = shop.catPos.top + "%";
+      catWrap.style.width = shop.catPos.width + "%";
       catImg.src = friend.avatar;
       catImg.alt = friend.name;
-      catImg.style.left = shop.catPos.left + "%";
-      catImg.style.top = shop.catPos.top + "%";
-      catImg.style.width = shop.catPos.width + "%";
+      catImg.style.width = "100%";
       catImg.style.height = "auto";
+    }
+
+    if (catName) {
+      catName.textContent = friend.name + "的哈基米";
     }
 
     if (label) {
@@ -380,21 +910,24 @@
   }
 
   function closeVisitView() {
+    var comparePanel = document.getElementById("friendsComparePanel");
+    var feedPanel = document.getElementById("friendsFeedPanel");
     var view = document.getElementById("friendsVisit");
-    if (view) {
-      view.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
+
+    hidePanel(comparePanel, null);
+    hidePanel(feedPanel, null);
     hideCatBar();
+    hidePanel(view, lastListFocus);
+    document.body.style.overflow = "";
     currentVisitId = null;
   }
 
   function showCatBar() {
     var bar = document.getElementById("friendsCatBar");
-    var catImg = document.getElementById("friendsVisitCat");
-    if (!bar || !catImg) return;
+    var catWrap = document.getElementById("friendsVisitCatWrap");
+    if (!bar || !catWrap) return;
 
-    var rect = catImg.getBoundingClientRect();
+    var rect = catWrap.getBoundingClientRect();
     var stage = document.querySelector('.friends-visit__stage');
     var stageRect = stage ? stage.getBoundingClientRect() : { left: 0, top: 0 };
 
@@ -409,7 +942,11 @@
 
   function hideCatBar() {
     var bar = document.getElementById("friendsCatBar");
-    if (bar) bar.setAttribute("aria-hidden", "true");
+    if (!bar) {
+      return;
+    }
+    blurFocusWithin(bar);
+    bar.setAttribute("aria-hidden", "true");
   }
 
   function toggleCatBar() {
@@ -430,49 +967,48 @@
 
   function setupVisitView() {
     var backBtn = document.getElementById("friendsVisitBack");
-    var overlay = document.getElementById("friendsVisitOverlay");
-    var catImg = document.getElementById("friendsVisitCat");
+    var catWrap = document.getElementById("friendsVisitCatWrap");
     var feedBtn = document.getElementById("friendsCatFeed");
     var petBtn = document.getElementById("friendsCatPet");
+    var visitPrefBtn = document.getElementById("friendsVisitPref");
+    var visitFeedBtn = document.getElementById("friendsVisitFeed");
 
     if (backBtn) backBtn.addEventListener("click", closeVisitView);
-    if (overlay) overlay.addEventListener("click", closeVisitView);
-    if (catImg) catImg.addEventListener("click", function (e) {
+    if (catWrap) catWrap.addEventListener("click", function (e) {
       e.stopPropagation();
       toggleCatBar();
     });
     if (feedBtn) feedBtn.addEventListener("click", function (e) {
       e.stopPropagation();
-      handleFeedCat();
+      openFeedPanel();
     });
     if (petBtn) petBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       handlePetCat();
     });
+    if (visitPrefBtn) visitPrefBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      hideCatBar();
+      openComparePanel();
+    });
+    if (visitFeedBtn) visitFeedBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      hideCatBar();
+      openFeedPanel();
+    });
 
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeVisitView();
+      if (e.key !== "Escape") return;
+      var comparePanel = document.getElementById("friendsComparePanel");
+      var feedPanel = document.getElementById("friendsFeedPanel");
+      if (comparePanel && comparePanel.getAttribute("aria-hidden") === "false") return;
+      if (feedPanel && feedPanel.getAttribute("aria-hidden") === "false") return;
+      closeVisitView();
     });
   }
 
   function handleFeedCat() {
-    var friend = FRIENDS.find(function (f) { return f.id === currentVisitId; });
-    if (!friend) return;
-
-    var coins = global.Yummi && global.Yummi.fishCoins ? global.Yummi.fishCoins.get() : 0;
-    if (coins < 1) {
-      showToast("小鱼干币不足，快去赚取吧 ~");
-      return;
-    }
-
-    if (global.Yummi && global.Yummi.fishCoins) {
-      global.Yummi.fishCoins.spend(1);
-      global.Yummi.fishCoins.render("fishCoinBar");
-    }
-
-    addAffinity(5);
-    renderList();
-    showToast("投喂成功！亲密度 +5");
+    openFeedPanel();
   }
 
   function handlePetCat() {
@@ -493,7 +1029,8 @@
     var action = btn.getAttribute("data-action");
     var id = btn.getAttribute("data-id");
     var friend = FRIENDS.find(function (f) { return f.id === id; });
-    var name = friend ? friend.name : "";
+
+    lastListFocus = btn;
 
     if (action === "visit") {
       openVisitView(id);
@@ -525,6 +1062,8 @@
     renderList();
     setupMsgPanel();
     setupVisitView();
+    setupComparePanel();
+    setupFeedPanel();
 
     var main = document.getElementById("friendsMain");
     if (main) main.addEventListener("click", handleAction);

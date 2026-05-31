@@ -79,12 +79,16 @@
 /* 单只小猫 */
 .shop-cat {
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   pointer-events: auto;
   transition: transform var(--transition-fast);
 }
 
 .shop-cat:active {
-  transform: scale(1.1);
+  transform: scale(1.06);
 }
 
 .shop-cat__img {
@@ -92,6 +96,23 @@
   height: auto;
   min-width: 120px;
   filter: drop-shadow(0 2px 4px rgba(92, 75, 58, 0.2));
+}
+
+.shop-cat__name {
+  max-width: 9em;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  letter-spacing: var(--letter-caption);
+  color: var(--color-primary);
+  background: rgba(245, 240, 232, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-rest);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
 }
 
 /* 小猫头上弹窗 */
