@@ -1,0 +1,4 @@
+上传说明
+1. 进入 SubmissionDemo 文件夹，选中内部全部内容（index.html、css、js、assets、source 等）
+2. 右键压缩为 ZIP；解压后第一层必须是 index.html，不要多套一层 SubmissionDemo 文件夹
+3. 或直接从 GitHub 仓库下载 SubmissionDemo 文件夹

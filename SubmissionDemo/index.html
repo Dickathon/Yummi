@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="format-detection" content="telephone=no">
+  <title>Yummi</title>
+  <!-- 全局样式（协商后修改） -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/nav.css">
+  <!-- 模块样式（各负责人只改对应文件） -->
+  <link rel="stylesheet" href="css/modules/order.css">
+  <link rel="stylesheet" href="css/modules/dress.css">
+  <link rel="stylesheet" href="css/modules/social.css">
+</head>
+<body>
+  <div class="fish-coin" id="fishCoinBar" title="小鱼干币"></div>
+  <button type="button" class="top-dress-btn" id="topDressBtn" title="装扮">装扮</button>
+  <button type="button" class="top-help-btn" id="topOrderHelpBtn" title="查看引导" aria-label="查看引导" hidden>?</button>
+
+  <!-- 装扮面板 -->
+  <div class="dress-panel" id="dressPanel" aria-hidden="true">
+    <div class="dress-panel__overlay" id="dressPanelOverlay"></div>
+    <div class="dress-panel__sheet" id="dressPanelSheet">
+      <div class="dress-panel__header">
+        <h2 class="dress-panel__title">装扮</h2>
+        <button type="button" class="dress-panel__close" id="dressPanelClose" aria-label="关闭">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="dress-panel__body" id="dressPanelBody">
+        <div class="dress-panel__placeholder">
+          <div class="dress-panel__placeholder-icon">👗</div>
+          <div class="dress-panel__placeholder-text">宠物装扮玩法开发中</div>
+          <div class="dress-panel__placeholder-sub">敬请期待 ~</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="app">
+    <main id="screen-root" class="app-main" role="main"></main>
+  </div>
+
+  <nav id="tab-bar" class="tab-bar" role="tablist" aria-label="主导航">
+    <button type="button" class="tab-bar__item tab-bar__item--active" role="tab" aria-selected="true" data-tab="order" id="tab-order">
+      <span class="tab-bar__icon-wrap" data-tab="order">
+        <svg class="tab-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 4.5c0 1.4-.7 2.4-.9 3.8"/>
+          <path d="M12 3.5c0 1.6-.7 2.6-.9 4.2"/>
+          <path d="M16 4.5c0 1.4-.7 2.4-.9 3.8"/>
+          <path d="M4 11h16"/>
+          <path d="M5 11c0 5.8 3.2 8.5 7 8.5s7-2.7 7-8.5"/>
+          <path d="M17.5 2.5l2.5 7.5"/>
+          <path d="M20 2.5l-3 7.5"/>
+        </svg>
+      </span>
+      <span class="tab-bar__label">点餐</span>
+    </button>
+    <button type="button" class="tab-bar__item" role="tab" aria-selected="false" data-tab="dress" id="tab-dress">
+      <span class="tab-bar__icon-wrap" data-tab="dress">
+        <svg class="tab-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 15.5v5"/>
+          <path d="M12 15.5c-2.2 0-4.2-1.6-6.2-3.6-1.4-1.4-1.1-3.3 0-4.3 1.6-1.2 3.3.3 4.4 1.8"/>
+          <path d="M12 15.5c2.2 0 4.2-1.6 6.2-3.6 1.4-1.4 1.1-3.3 0-4.3-1.6-1.2-3.3.3-4.4 1.8"/>
+          <circle cx="12" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+          <path d="M8.5 20.2c1.6-.9 3.1-.9 3.5-.9"/>
+          <path d="M15.5 20.2c-1.6-.9-3.1-.9-3.5-.9"/>
+          <path d="M9 9.5l3-2.5 3 2.5"/>
+        </svg>
+      </span>
+      <span class="tab-bar__label">装扮</span>
+    </button>
+    <button type="button" class="tab-bar__item" role="tab" aria-selected="false" data-tab="social" id="tab-social">
+      <span class="tab-bar__icon-wrap" data-tab="social">
+        <svg class="tab-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="8.5" cy="7.5" r="2.8"/>
+          <path d="M4 17.5c0-3.6 2.1-5.5 4.5-5.5s4.5 1.9 4.5 5.5"/>
+          <circle cx="16.5" cy="8.5" r="2.3"/>
+          <path d="M12.8 17.5c0-3 1.9-4.8 3.7-4.8s3.5 1.8 3.5 4.8"/>
+          <path d="M19.5 5.5h1.5"/>
+          <path d="M20.25 4.75v1.5"/>
+        </svg>
+      </span>
+      <span class="tab-bar__label">社交</span>
+    </button>
+  </nav>
+
+  <!-- 共享脚本（协商后修改） -->
+  <script src="js/data/foods.js"></script>
+  <script src="js/data/food-taste-db.js"></script>
+  <script src="js/data/food-taste.js"></script>
+  <script src="js/data/food-personality.js"></script>
+  <script src="js/data/food-selection-codec.js"></script>
+  <script src="js/data/food-pet-appearance.js"></script>
+  <script src="js/data/food-selection.js"></script>
+  <script src="js/data/yummy-code.js"></script>
+  <script src="js/core/util.js"></script>
+  <script src="js/core/screens.js"></script>
+  <script src="js/core/module.js"></script>
+
+  <!-- 模块：点餐 [order] -->
+  <script src="js/modules/order/items-catalog.js"></script>
+  <script src="js/modules/order/placards.js"></script>
+  <script src="js/modules/order/config.js"></script>
+  <script src="js/modules/order/state.js"></script>
+  <script src="js/modules/order/guide.js"></script>
+  <script src="js/modules/order/pet-reveal.js"></script>
+  <script src="js/modules/order/view.js"></script>
+  <script src="js/modules/order/screen.js"></script>
+  <script src="js/modules/order/index.js"></script>
+
+  <!-- 模块：装扮 [dress] -->
+  <script src="js/modules/dress/config.js"></script>
+  <script src="js/modules/dress/state.js"></script>
+  <script src="js/modules/dress/exporter.js"></script>
+  <script src="js/modules/dress/guide.js"></script>
+  <script src="js/modules/dress/thumb-focus.js"></script>
+  <script src="js/modules/dress/view.js"></script>
+  <script src="js/modules/dress/screen.js"></script>
+  <script src="js/modules/dress/index.js"></script>
+
+  <!-- 模块：社交 [social] -->
+  <script src="js/modules/social/config.js"></script>
+  <script src="js/modules/social/state.js"></script>
+  <script src="js/modules/social/view.js"></script>
+  <script src="js/modules/social/screen.js"></script>
+  <script src="js/modules/social/index.js"></script>
+
+  <script src="js/fish-coins.js"></script>
+  <script src="js/core/guides.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
